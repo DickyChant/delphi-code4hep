@@ -36,4 +36,4 @@ jobs:
             -v /cvmfs:/cvmfs:shared \
             -v "${{ github.workspace }}:/repo" \
             almalinux:9 \
-            bash -lc 'dnf install -y -q git glibc-devel zlib-devel libxcrypt-devel && /repo/scripts/test-embed.sh /repo/sources /repo/build/embed-smoke'
+            bash -lc 'dnf install -y -q git gcc gcc-c++ glibc-devel zlib-devel libxcrypt-devel && /repo/scripts/test-embed.sh /repo/sources /repo/build/embed-smoke'
