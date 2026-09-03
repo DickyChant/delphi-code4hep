@@ -1,0 +1,39 @@
+name: integration
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  locked-checkouts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate scripts
+        run: bash -n scripts/*.sh versions.env
+      - name: Check out locked integration set
+        run: scripts/checkout.sh
+      - name: Verify locked integration set
+        run: scripts/verify.sh
+
+  embedded-converter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mount DELPHI and Key4hep CVMFS repositories
+        uses: cvmfs-contrib/github-action-cvmfs@v5
+        with:
+          cvmfs_repositories: 'delphi.cern.ch,sw.hsf.org'
+      - name: Warm CVMFS mounts
+        run: ls /cvmfs/delphi.cern.ch /cvmfs/sw.hsf.org
+      - name: Compile converter as an embedded CMake project
+        run: |
+          docker run --rm \
+            -v /cvmfs:/cvmfs:shared \
+            -v "${{ github.workspace }}:/repo" \
+            almalinux:9 \
+            bash -lc 'dnf install -y -q git glibc-devel zlib-devel libxcrypt-devel && /repo/scripts/test-embed.sh /repo/sources /repo/build/embed-smoke'
