@@ -46,10 +46,16 @@ unchanged when no converter source is supplied.
 
 ## Scope
 
-This first integration builds the existing converter and tests in the Code4hep
-build. A later native Code4hep `InputSource` will publish its EDM4hep collections
-directly. PHDST/SKELANA are kept for the first identity baseline; their COMMON
-block consumers must be replaced domain-by-domain before SKELANA can safely be
-removed.
+This integration builds the converter and its tests inside the Code4hep build.
+The pinned DELPHI revision also contains the first direct event-service slice:
+dataset version, magnetic field, beamspot, stored BTAG information, and event
+summary values no longer need to be read from SKELANA COMMON blocks. Its design,
+validation evidence, and remaining migration work are documented in
+`delphi-edm4hep/docs/no-skelana-migration.md`.
+
+This is not yet a claim that `libskelanaxx` can be removed. The converter still
+uses `PSINI`/`PSBEG` and remaining SKELANA-backed reconstruction domains while
+their ordering-sensitive behavior is split and validated. A later native
+Code4hep `InputSource` can publish the resulting EDM4hep collections directly.
 
 No pull request is created by any script in this repository.
