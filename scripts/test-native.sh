@@ -113,10 +113,13 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   IOUtilities \
   DataFormats \
   plugin_Code4hepDataFormatsPlugins \
+  plugin_Code4hepGeneratorsPlugins \
+  plugin_Code4hepG4ApplicationPlugins \
   plugin_Code4hepIOPlugins \
   plugin_DelphiInputPlugins \
   delphiRun \
   particle_counts_test \
+  bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
 
 plugin_dir="${code4hep_build}/lib"
@@ -124,12 +127,17 @@ export LD_LIBRARY_PATH="${plugin_dir}:${LD_LIBRARY_PATH:-}"
 export PYTHONPATH="${code4hep_build}/python:${PYTHONPATH:-}"
 
 data_plugin="${plugin_dir}/edmpluginplugin_Code4hepDataFormatsPlugins.so"
+generator_plugin="${plugin_dir}/edmpluginplugin_Code4hepGeneratorsPlugins.so"
+g4_plugin="${plugin_dir}/edmpluginplugin_Code4hepG4ApplicationPlugins.so"
 io_plugin="${plugin_dir}/edmpluginplugin_Code4hepIOPlugins.so"
 delphi_plugin="${plugin_dir}/edmpluginplugin_DelphiInputPlugins.so"
 require_file "${data_plugin}"
+require_file "${generator_plugin}"
+require_file "${g4_plugin}"
 require_file "${io_plugin}"
 require_file "${delphi_plugin}"
-edmPluginRefresh -p "${data_plugin}" "${io_plugin}" "${delphi_plugin}"
+edmPluginRefresh -p "${data_plugin}" "${generator_plugin}" "${g4_plugin}" \
+  "${io_plugin}" "${delphi_plugin}"
 if ! grep -q 'DelphiSource' "${plugin_dir}/.edmplugincache"; then
   echo "ERROR: DelphiSource was not registered in the plugin cache" >&2
   exit 1
@@ -139,9 +147,28 @@ if ! grep -q 'delphi_edm4hep::DelphiEventSummaryProducer' \
   echo "ERROR: DelphiEventSummaryProducer was not registered in the plugin cache" >&2
   exit 1
 fi
+for plugin in GenProducer G4SimProducer; do
+  if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
+    echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
+    exit 1
+  fi
+done
 
 "${code4hep_build}/Code4hep/IO/test/bin_testCode4hepIOCatch2"
+"${code4hep_build}/Code4hep/G4Application/test/bin_testCode4hepG4SimProducerTP"
 "${code4hep_build}/delphi_edm4hep/tests/particle_counts_test"
+
+# The framework's simulation path must produce persistent EDM4hep hits, not
+# merely process and discard a G4Event. Use the lightweight one-muon source.
+g4_output="${build_root}/g4-smoke.edm4hep.root"
+(
+  cd "${workspace}/Code4hep"
+  C4H_MAX_EVENTS=1 C4H_OUTPUT="${g4_output}" \
+    cmsRun Code4hep/G4Application/python/hepmc3-sim_cfg.py \
+      > "${build_root}/g4-smoke.log" 2>&1
+)
+require_file "${g4_output}"
+python3 "${repo_root}/scripts/check-g4-products.py" "${g4_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
@@ -197,4 +224,4 @@ if ! grep -q 'delivered 1 events to the in-memory source' \
   exit 1
 fi
 
-echo "Native delphiRun conversion, scheduled-module closure, and SKELANA-free link audit passed"
+echo "Native delphiRun conversion, Geant4 products, scheduled-module closure, and SKELANA-free link audit passed"

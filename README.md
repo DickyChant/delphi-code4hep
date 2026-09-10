@@ -72,6 +72,13 @@ PA.MAIN charge-code collection and publishes `native_EVT_nCharged` and
 `native_EVT_nNeutral` as normal Frame parameters. CI checks both values against
 the legacy event summary on every fixture event.
 
+The locked Code4hep revision also has a runnable Geant4 path. Its generator is
+seeded without the unavailable CMSSW RNG service, `G4SimProducer` publishes
+`SimTrackerHitCollection` and `SimCalorimeterHitCollection`, and CI validates
+non-empty physical hit content with the bundled one-muon GDML example. This is
+framework infrastructure; replacing the example geometry with DELPHI geometry
+and adding detector-specific digitizers remain separate migration steps.
+
 ## Scope
 
 This integration removes the runtime SKELANA lifecycle from the native path.
