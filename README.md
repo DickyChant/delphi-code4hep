@@ -106,7 +106,9 @@ ionization, Landau fluctuations, diffusion in time, thresholds, and ADC
 response remain the next TPC digitization layers. Native conditions decoding
 already supplies those layers with the v94c high voltage, dE/dx and pad-gain
 normalizations, both endcap drift velocities, and all packed sector gate
-states directly from CARGO.
+states directly from CARGO. It also expands the complete 20,160-channel packed
+pad calibration into electronics channel, pedestal, two-range slope, gain
+ratio, crossover, and status values.
 
 ## Scope
 

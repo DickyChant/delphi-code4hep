@@ -219,6 +219,10 @@ for expected in \
   drift_velocity_endcap0_cm_per_us=6.998 \
   drift_velocity_endcap1_cm_per_us=7.002 \
   closed_gates=12 \
+  pad_calibrations=20160 \
+  nonzero_pad_statuses=736 \
+  minimum_gain_ratio=4.052 \
+  maximum_gain_ratio=5.286 \
   centre_pad_mismatches=0 \
   stampa_response_mismatches=0; do
   if ! grep -qx "${expected}" <<< "${tpc_readout_audit}"; then
