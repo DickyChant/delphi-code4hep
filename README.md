@@ -79,12 +79,13 @@ non-empty physical hit content with the bundled one-muon GDML example. The
 magnetic field is explicit configuration and is persisted as
 `sim_detector_magneticFieldTesla`.
 
-The DELPHI side now has a dependency-free C++ parser for the authoritative
-CARGO/DDAPP simulation snapshot. CI reads the pinned v94c snapshot and checks
-its 11,265 records, including 7,703 geometry and 202 material records. The next
-simulation slice is translating those parsed `SHAP`/`REFR`/`MATS`/`REPL`
-directives into modern geometry and adding detector-specific digitizers; the
-bundled GDML remains a framework test, not a DELPHI detector model.
+The DELPHI side now has a dependency-free C++ parser and typed model for the
+authoritative CARGO/DDAPP simulation snapshot. CI reads the pinned v94c
+snapshot and requires complete decoding of 202 materials, 7,703 geometry
+nodes, 6,220 shapes, 4,246 transforms, and 1,506 replacement paths. The next
+simulation slice is translating that validated model into DD4hep/GDML and
+adding detector-specific digitizers; the bundled GDML remains a framework
+test, not a DELPHI detector model.
 
 ## Scope
 

@@ -120,6 +120,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   delphiRun \
   particle_counts_test \
   cargo_database_test \
+  geometry_model_test \
   delphi_geometry_audit \
   bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
@@ -160,12 +161,24 @@ done
 "${code4hep_build}/Code4hep/G4Application/test/bin_testCode4hepG4SimProducerTP"
 "${code4hep_build}/delphi_edm4hep/tests/particle_counts_test"
 "${code4hep_build}/delphi_edm4hep/tests/cargo_database_test"
+"${code4hep_build}/delphi_edm4hep/tests/geometry_model_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
 geometry_audit=$("${code4hep_build}/delphi_edm4hep/delphi_geometry_audit" \
   "${geometry_snapshot}")
-for expected in records=11265 GEOM=7703 MATC=202 GEOM_with_SHAP=6000 MATC_with_MATF=202; do
+for expected in \
+  records=11265 \
+  GEOM=7703 \
+  MATC=202 \
+  GEOM_with_SHAP=6000 \
+  MATC_with_MATF=202 \
+  typed_materials=202 \
+  typed_geometry_nodes=7703 \
+  typed_material_assignments=5424 \
+  typed_shapes=6220 \
+  typed_references=4246 \
+  typed_replacements=1506; do
   if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
     echo "ERROR: native geometry audit is missing '${expected}'" >&2
     exit 1
