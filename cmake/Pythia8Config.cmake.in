@@ -1,0 +1,8 @@
+set(Pythia8_FOUND TRUE)
+
+if(NOT TARGET Pythia8::Pythia8)
+  add_library(Pythia8::Pythia8 UNKNOWN IMPORTED)
+  set_target_properties(Pythia8::Pythia8 PROPERTIES
+    IMPORTED_LOCATION "@PYTHIA_LIBRARY@"
+    INTERFACE_INCLUDE_DIRECTORIES "@PYTHIA_INCLUDE@")
+endif()

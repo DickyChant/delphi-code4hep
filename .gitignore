@@ -1,2 +1,4 @@
 /sources/
 /build/
+__pycache__/
+fort.*

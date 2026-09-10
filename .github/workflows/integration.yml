@@ -20,20 +20,20 @@ jobs:
       - name: Verify locked integration set
         run: scripts/verify.sh
 
-  embedded-converter:
+  native-code4hep-source:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Mount DELPHI and Key4hep CVMFS repositories
+      - name: Mount DELPHI, Key4hep, and CMS CVMFS repositories
         uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
-          cvmfs_repositories: 'delphi.cern.ch,sw.hsf.org'
+          cvmfs_repositories: 'delphi.cern.ch,sw.hsf.org,cms.cern.ch'
       - name: Warm CVMFS mounts
-        run: ls /cvmfs/delphi.cern.ch /cvmfs/sw.hsf.org
-      - name: Compile converter as an embedded CMake project
+        run: ls /cvmfs/delphi.cern.ch /cvmfs/sw.hsf.org /cvmfs/cms.cern.ch
+      - name: Build and audit the native Code4hep source
         run: |
           docker run --rm \
             -v /cvmfs:/cvmfs:shared \
             -v "${{ github.workspace }}:/repo" \
             almalinux:9 \
-            bash -lc 'dnf install -y -q git gcc gcc-c++ glibc-devel zlib-devel libxcrypt-devel && /repo/scripts/test-embed.sh /repo/sources /repo/build/embed-smoke'
+            bash -lc 'dnf install -y -q git gcc gcc-c++ make binutils glibc-devel zlib-devel libxcrypt-devel libuuid-devel pkgconf-pkg-config perl-core && /repo/scripts/test-native.sh /repo/sources /repo/build/native-code4hep'
