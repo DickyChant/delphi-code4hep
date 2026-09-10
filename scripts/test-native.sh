@@ -116,6 +116,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   plugin_Code4hepIOPlugins \
   plugin_DelphiInputPlugins \
   delphiRun \
+  particle_counts_test \
   bin_testCode4hepIOCatch2
 
 plugin_dir="${code4hep_build}/lib"
@@ -133,8 +134,14 @@ if ! grep -q 'DelphiSource' "${plugin_dir}/.edmplugincache"; then
   echo "ERROR: DelphiSource was not registered in the plugin cache" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiEventSummaryProducer' \
+    "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiEventSummaryProducer was not registered in the plugin cache" >&2
+  exit 1
+fi
 
 "${code4hep_build}/Code4hep/IO/test/bin_testCode4hepIOCatch2"
+"${code4hep_build}/delphi_edm4hep/tests/particle_counts_test"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
@@ -182,10 +189,12 @@ if ! grep -q 'sDST_EVT_dstProcessingTag' <<< "${podio_dump}"; then
   echo "ERROR: delphiRun smoke output lost DELPHI frame metadata" >&2
   exit 1
 fi
+python3 "${repo_root}/scripts/check-native-event-summary.py" \
+  "${DELPHI_OUTPUT}"
 if ! grep -q 'delivered 1 events to the in-memory source' \
     "${runtime_dir}/run.log"; then
   echo "ERROR: delphiRun did not report one in-memory event" >&2
   exit 1
 fi
 
-echo "Native delphiRun conversion and SKELANA-free link audit passed"
+echo "Native delphiRun conversion, scheduled-module closure, and SKELANA-free link audit passed"

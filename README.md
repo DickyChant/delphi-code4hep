@@ -66,6 +66,12 @@ The source is single-threaded at the legacy PHDST boundary. Set
 `DELPHI_CONVERSION_PASS=fdst` plus path-separated
 `DELPHI_INTERMEDIATE_FILES` for pass 2.
 
+The steering also schedules `DelphiEventSummaryProducer`, the first derived
+DELPHI calculation moved beyond the source boundary. It consumes the immutable
+PA.MAIN charge-code collection and publishes `native_EVT_nCharged` and
+`native_EVT_nNeutral` as normal Frame parameters. CI checks both values against
+the legacy event summary on every fixture event.
+
 ## Scope
 
 This integration removes the runtime SKELANA lifecycle from the native path.
