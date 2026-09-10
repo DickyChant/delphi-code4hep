@@ -122,6 +122,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   cargo_database_test \
   geometry_model_test \
   gdml_world_writer_test \
+  gdml_beam_pipe_writer_test \
   delphi_geometry_audit \
   delphi_geometry_export \
   bin_testCode4hepG4SimProducerTP \
@@ -165,6 +166,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/cargo_database_test"
 "${code4hep_build}/delphi_edm4hep/tests/geometry_model_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_world_writer_test"
+"${code4hep_build}/delphi_edm4hep/tests/gdml_beam_pipe_writer_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
@@ -188,15 +190,42 @@ for expected in \
   fi
 done
 
-# Render the actual v94c DELF world boundary and prove that the generated GDML
-# is accepted by the Code4hep Geant4 path at the DELSIM central field. Child
-# detector volumes are intentionally not claimed by this first renderer.
+# Keep the narrow world-only export covered for clients that do not yet want
+# detector children.
 delphi_world_gdml="${build_root}/delphi-v94c-world.gdml"
 "${code4hep_build}/delphi_edm4hep/delphi_geometry_export" \
   "${geometry_snapshot}" "${delphi_world_gdml}"
 require_file "${delphi_world_gdml}"
 if ! grep -q 'rmax="680" z="1170"' "${delphi_world_gdml}"; then
   echo "ERROR: exported DELPHI world has the wrong primary bounds" >&2
+  exit 1
+fi
+
+# Render the complete authoritative /BEA* subsystem. Exact topology counts
+# guard the replacement expansion: MSK1 inherits MSK2's three insert children,
+# producing 109 beam-pipe logical instances from 106 source nodes.
+delphi_beam_pipe_gdml="${build_root}/delphi-v94c-beam-pipe.gdml"
+"${code4hep_build}/delphi_edm4hep/delphi_geometry_export" --beam-pipe \
+  "${geometry_snapshot}" "${delphi_beam_pipe_gdml}"
+require_file "${delphi_beam_pipe_gdml}"
+for tag_count in \
+  '<material name=:10' \
+  '<polycone name=:116' \
+  '<box name=:1' \
+  '<union name=:8' \
+  '<volume name=:110' \
+  '<physvol name=:109'; do
+  tag=${tag_count%:*}
+  expected_count=${tag_count##*:}
+  actual_count=$(grep -c "${tag}" "${delphi_beam_pipe_gdml}")
+  if [[ "${actual_count}" != "${expected_count}" ]]; then
+    echo "ERROR: beam-pipe GDML has ${actual_count} '${tag}', expected ${expected_count}" >&2
+    exit 1
+  fi
+done
+if ! grep -q 'MSK1_placement_0_rotation.*x="-180".*z="-90"' \
+    "${delphi_beam_pipe_gdml}"; then
+  echo "ERROR: beam-pipe GDML did not preserve the DXMATR mask rotation" >&2
   exit 1
 fi
 
@@ -212,19 +241,19 @@ g4_output="${build_root}/g4-smoke.edm4hep.root"
 require_file "${g4_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" "${g4_output}"
 
-delphi_world_output="${build_root}/delphi-world-smoke.edm4hep.root"
+delphi_beam_pipe_output="${build_root}/delphi-beam-pipe-smoke.edm4hep.root"
 (
   cd "${workspace}/Code4hep"
   C4H_MAX_EVENTS=1 \
-    C4H_GDML="${delphi_world_gdml}" \
+    C4H_GDML="${delphi_beam_pipe_gdml}" \
     C4H_FIELD_TESLA=1.2312434 \
-    C4H_OUTPUT="${delphi_world_output}" \
+    C4H_OUTPUT="${delphi_beam_pipe_output}" \
     cmsRun Code4hep/G4Application/python/hepmc3-sim_cfg.py \
-      > "${build_root}/delphi-world-smoke.log" 2>&1
+      > "${build_root}/delphi-beam-pipe-smoke.log" 2>&1
 )
-require_file "${delphi_world_output}"
+require_file "${delphi_beam_pipe_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
-  --expected-field 1.2312434 --allow-empty-hits "${delphi_world_output}"
+  --expected-field 1.2312434 --allow-empty-hits "${delphi_beam_pipe_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
