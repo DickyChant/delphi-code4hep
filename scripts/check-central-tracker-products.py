@@ -13,6 +13,7 @@ REGIONS_MM = {
     "TPC": (281.0, 1230.0),
     "OD": (1900.0, 2100.0),
 }
+SUBSYSTEM_IDS = {"VD": 1, "ID": 2, "TPC": 3, "OD": 4}
 
 
 def main():
@@ -30,12 +31,18 @@ def main():
 
     counts = Counter()
     unclassified = []
+    mismatched_cell_ids = []
     for hit in frames[0].get("simSimTrackerHits"):
         position = hit.getPosition()
         radius = hypot(position.x, position.y)
         for name, (minimum, maximum) in REGIONS_MM.items():
             if minimum <= radius < maximum:
                 counts[name] += 1
+                subsystem = int(hit.getCellID()) >> 56
+                if subsystem != SUBSYSTEM_IDS[name]:
+                    mismatched_cell_ids.append(
+                        (name, subsystem, int(hit.getCellID()), radius)
+                    )
                 break
         else:
             unclassified.append(radius)
@@ -51,11 +58,12 @@ def main():
         for name, minimum in minimums.items()
         if counts[name] < minimum
     }
-    if failures or unclassified:
+    if failures or unclassified or mismatched_cell_ids:
         raise RuntimeError(
             "central-tracker subsystem coverage failed: "
             f"counts={dict(counts)}, minimums={minimums}, "
-            f"unclassified_radii_mm={unclassified[:10]}"
+            f"unclassified_radii_mm={unclassified[:10]}, "
+            f"mismatched_cell_ids={mismatched_cell_ids[:10]}"
         )
 
     print(

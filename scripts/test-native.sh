@@ -374,7 +374,8 @@ for tag_count in \
   '<volume name=:2004' \
   '<physvol name=:2559' \
   'auxtype="SensDet":439' \
-  'auxtype="StepLimit":290'; do
+  'auxtype="StepLimit":290' \
+  'auxtype="CellIDBase":439'; do
   tag=${tag_count%:*}
   expected_count=${tag_count##*:}
   actual_count=$(grep -c "${tag}" "${delphi_tracking_gdml}")

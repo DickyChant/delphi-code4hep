@@ -147,6 +147,10 @@ reconstructs the outer detector's segmented hollow `POL4` layers, and
 `--tracking` composes beam pipe, VD, ID, TPC, and OD into one detector. CI pins
 the full 2,004-volume/2,559-placement topology and requires persistent,
 truth-linked hits in all four tracking regions from one fixed transverse muon.
+Each sensitive logical volume carries an explicit GDML `CellIDBase`; Code4hep
+combines it with the physical copy number and persists that semantic ID instead
+of exposing hit-collection ordering. CI requires the high byte to identify VD,
+ID, TPC, or OD consistently with the transported hit position.
 This is not yet a claim of a complete native pipeline: only the TPC currently
 has calibrated digitization and hit reconstruction. VD/ID/OD response,
 tracking and vertex reconstruction, the non-tracking detectors, and the final
