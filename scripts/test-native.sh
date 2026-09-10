@@ -357,6 +357,33 @@ if ! grep -q \
   exit 1
 fi
 
+# Compose the full central tracker from its authoritative VD, ID, TPC, and OD
+# trees. FORB and POL4 are exact tessellated solids; the topology counts pin
+# both their rendering and the expanded CARGO replacement instances.
+delphi_tracking_gdml="${build_root}/delphi-v94c-tracking.gdml"
+"${code4hep_build}/delphi_edm4hep/delphi_geometry_export" --tracking \
+  "${geometry_snapshot}" "${delphi_tracking_gdml}"
+require_file "${delphi_tracking_gdml}"
+for tag_count in \
+  '<material name=:59' \
+  '<polycone name=:802' \
+  '<box name=:613' \
+  '<tessellated name=:613' \
+  '<triangular vertex1=:7824' \
+  '<assembly name=:556' \
+  '<volume name=:2004' \
+  '<physvol name=:2559' \
+  'auxtype="SensDet":439' \
+  'auxtype="StepLimit":290'; do
+  tag=${tag_count%:*}
+  expected_count=${tag_count##*:}
+  actual_count=$(grep -c "${tag}" "${delphi_tracking_gdml}")
+  if [[ "${actual_count}" != "${expected_count}" ]]; then
+    echo "ERROR: tracking GDML has ${actual_count} '${tag}', expected ${expected_count}" >&2
+    exit 1
+  fi
+done
+
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
 g4_output="${build_root}/g4-smoke.edm4hep.root"
@@ -370,22 +397,24 @@ require_file "${g4_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
   --expected-primary-pdg 13 "${g4_output}"
 
-delphi_vertex_output="${build_root}/delphi-vertex-smoke.edm4hep.root"
+delphi_tracking_output="${build_root}/delphi-tracking-smoke.edm4hep.root"
 (
   cd "${workspace}/Code4hep"
   C4H_MAX_EVENTS=1 \
-    C4H_GDML="${delphi_vertex_gdml}" \
+    C4H_GDML="${delphi_tracking_gdml}" \
     C4H_FIELD_TESLA=1.2312434 \
-    C4H_OUTPUT="${delphi_vertex_output}" \
-    cmsRun "${repo_root}/steering/delphi_vertex_sim_cfg.py" \
-      > "${build_root}/delphi-vertex-smoke.log" 2>&1
+    C4H_OUTPUT="${delphi_tracking_output}" \
+    cmsRun "${repo_root}/steering/delphi_tracking_sim_cfg.py" \
+      > "${build_root}/delphi-tracking-smoke.log" 2>&1
 )
-require_file "${delphi_vertex_output}"
+require_file "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
   --expected-field 1.2312434 --min-tracker-hits 100 \
   --expected-primary-pdg 13 \
   --allow-empty-calorimeter-hits \
-  "${delphi_vertex_output}"
+  "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-central-tracker-products.py" \
+  "${delphi_tracking_output}"
 
 delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 (

@@ -141,6 +141,17 @@ with the native `STEPS=0.001 cm` limit. CI fixes the expanded topology and
 requires a one-muon Geant4 event to produce persistent, truth-linked silicon
 steps through those placed sensors.
 
+The same renderer now completes the central-tracker transport boundary.
+`--id` reconstructs the inner detector's DELPHI `FORB` cells, `--od`
+reconstructs the outer detector's segmented hollow `POL4` layers, and
+`--tracking` composes beam pipe, VD, ID, TPC, and OD into one detector. CI pins
+the full 2,004-volume/2,559-placement topology and requires persistent,
+truth-linked hits in all four tracking regions from one fixed transverse muon.
+This is not yet a claim of a complete native pipeline: only the TPC currently
+has calibrated digitization and hit reconstruction. VD/ID/OD response,
+tracking and vertex reconstruction, the non-tracking detectors, and the final
+replacement of the PHDST/DSTANA input boundary remain.
+
 ## Scope
 
 This integration removes the runtime SKELANA lifecycle from the native path.

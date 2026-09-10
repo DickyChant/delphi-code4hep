@@ -5,7 +5,7 @@ from FWCore.Modules.modules import EmptySource
 from Code4hep.G4Application.modules import G4SimProducer
 from Code4hep.Generators.modules import GenProducer
 
-process = cms.Process("DELPHIVERTEX")
+process = cms.Process("DELPHITRACKING")
 process.source = EmptySource()
 process.maxEvents.input = int(os.environ.get("C4H_MAX_EVENTS", "1"))
 process.options.numberOfThreads = 1
