@@ -13,6 +13,7 @@ def main():
     parser.add_argument("--allow-empty-hits", action="store_true")
     parser.add_argument("--allow-empty-tracker-hits", action="store_true")
     parser.add_argument("--allow-empty-calorimeter-hits", action="store_true")
+    parser.add_argument("--min-tracker-hits", type=int, default=1)
     args = parser.parse_args()
 
     frames = list(root_io.Reader(args.file).get("events"))
@@ -29,7 +30,9 @@ def main():
     )
 
     if not (args.allow_empty_hits or args.allow_empty_tracker_hits) and (
-        len(tracker_hits) == 0 or tracker_energy <= 0 or tracker_path <= 0
+        len(tracker_hits) < args.min_tracker_hits
+        or tracker_energy <= 0
+        or tracker_path <= 0
     ):
         raise RuntimeError(
             "simulation did not produce physical tracker-hit content"

@@ -253,6 +253,11 @@ for tag_count in \
     exit 1
   fi
 done
+if ! grep -q 'auxtype="StepLimit" auxvalue="1" auxunit="cm"' \
+    "${delphi_tpc_gdml}"; then
+  echo "ERROR: TPC GDML is missing the DELPHI one-centimetre step limit" >&2
+  exit 1
+fi
 
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
@@ -278,7 +283,8 @@ delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 )
 require_file "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
-  --expected-field 1.2312434 --allow-empty-calorimeter-hits \
+  --expected-field 1.2312434 --min-tracker-hits 2 \
+  --allow-empty-calorimeter-hits \
   "${delphi_tpc_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
