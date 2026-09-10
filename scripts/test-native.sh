@@ -119,6 +119,8 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   plugin_DelphiInputPlugins \
   delphiRun \
   particle_counts_test \
+  cargo_database_test \
+  delphi_geometry_audit \
   bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
 
@@ -157,6 +159,18 @@ done
 "${code4hep_build}/Code4hep/IO/test/bin_testCode4hepIOCatch2"
 "${code4hep_build}/Code4hep/G4Application/test/bin_testCode4hepG4SimProducerTP"
 "${code4hep_build}/delphi_edm4hep/tests/particle_counts_test"
+"${code4hep_build}/delphi_edm4hep/tests/cargo_database_test"
+
+geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
+require_file "${geometry_snapshot}"
+geometry_audit=$("${code4hep_build}/delphi_edm4hep/delphi_geometry_audit" \
+  "${geometry_snapshot}")
+for expected in records=11265 GEOM=7703 MATC=202 GEOM_with_SHAP=6000 MATC_with_MATF=202; do
+  if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
+    echo "ERROR: native geometry audit is missing '${expected}'" >&2
+    exit 1
+  fi
+done
 
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
@@ -224,4 +238,4 @@ if ! grep -q 'delivered 1 events to the in-memory source' \
   exit 1
 fi
 
-echo "Native delphiRun conversion, Geant4 products, scheduled-module closure, and SKELANA-free link audit passed"
+echo "Native delphiRun conversion, DELPHI geometry parsing, Geant4 products, scheduled-module closure, and SKELANA-free link audit passed"

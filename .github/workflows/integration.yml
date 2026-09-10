@@ -36,4 +36,4 @@ jobs:
             -v /cvmfs:/cvmfs:shared \
             -v "${{ github.workspace }}:/repo" \
             almalinux:9 \
-            bash -lc 'dnf install -y -q git gcc gcc-c++ make binutils glibc-devel zlib-devel libxcrypt-devel libuuid-devel pkgconf-pkg-config perl-core perl-diagnostics && /repo/scripts/test-native.sh /repo/sources /repo/build/native-code4hep'
+            bash -lc 'dnf install -y -q git gcc gcc-c++ make binutils glibc-devel zlib-devel libxcrypt-devel libuuid-devel libglvnd-devel pkgconf-pkg-config perl-core perl-diagnostics && /repo/scripts/test-native.sh /repo/sources /repo/build/native-code4hep'
