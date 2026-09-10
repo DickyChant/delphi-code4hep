@@ -115,7 +115,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   plugin_Code4hepDataFormatsPlugins \
   plugin_Code4hepIOPlugins \
   plugin_DelphiInputPlugins \
-  delphi_cmsRun \
+  delphiRun \
   bin_testCode4hepIOCatch2
 
 plugin_dir="${code4hep_build}/lib"
@@ -136,7 +136,7 @@ fi
 
 "${code4hep_build}/Code4hep/IO/test/bin_testCode4hepIOCatch2"
 
-launcher="${code4hep_build}/delphi_edm4hep/delphi_cmsRun"
+launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
 launcher_dependencies=$(ldd "${launcher}")
 launcher_symbols=$(nm -D "${launcher}")
@@ -155,4 +155,37 @@ for symbol in phdst_ bpilot_ dstqid_ user00_ user01_ user02_ user99_; do
   fi
 done
 
-echo "Native DelphiSource build and SKELANA-free link audit passed"
+# Exercise the user-facing launcher and checked-in configuration on one real
+# simulated DELPHI event. Keep the working directory private because PHDST
+# uses fixed scratch names such as PDLINPUT and fort.3.
+fixture="${repo_root}/testdata/pythia8_94c2_one_event.fadana"
+require_file "${fixture}"
+runtime_dir="${build_root}/delphiRun-smoke"
+mkdir -p "${runtime_dir}"
+export DELPHI_INPUT="${fixture}"
+export DELPHI_OUTPUT="${runtime_dir}/output.root"
+export DELPHI_INPUT_MODE=file
+export DELPHI_CONVERSION_PASS=sdst
+export DELPHI_IS_REAL_DATA=false
+export DELPHI_MAX_EVENTS=1
+(
+  cd "${runtime_dir}"
+  "${launcher}" "${repo_root}/steering/delphi_convert_cfg.py" > run.log 2>&1
+)
+require_file "${DELPHI_OUTPUT}"
+podio_dump=$(podio-dump "${DELPHI_OUTPUT}")
+if ! grep -Eq '^events[[:space:]]+1[[:space:]]*$' <<< "${podio_dump}"; then
+  echo "ERROR: delphiRun smoke output does not contain exactly one event" >&2
+  exit 1
+fi
+if ! grep -q 'sDST_EVT_dstProcessingTag' <<< "${podio_dump}"; then
+  echo "ERROR: delphiRun smoke output lost DELPHI frame metadata" >&2
+  exit 1
+fi
+if ! grep -q 'delivered 1 events to the in-memory source' \
+    "${runtime_dir}/run.log"; then
+  echo "ERROR: delphiRun did not report one in-memory event" >&2
+  exit 1
+fi
+
+echo "Native delphiRun conversion and SKELANA-free link audit passed"

@@ -40,7 +40,7 @@ revisions, and delegates dependency construction to Code4hep's own `setup.sh`.
 Set `DELPHI_SETUP` to use another DELPHI setup script. Build products live next
 to the three source checkouts under `sources/`.
 
-The resulting converter executables and native `delphi_cmsRun` launcher are in
+The resulting converter executables and native `delphiRun` launcher are in
 `sources/Code4hep/build_Code4hep/delphi_edm4hep/`. Code4hep's ordinary build is
 unchanged when no converter source is supplied.
 
@@ -57,7 +57,7 @@ export DELPHI_INPUT=/path/to/input.fadana
 export DELPHI_OUTPUT=/path/to/output.root
 export DELPHI_IS_REAL_DATA=false
 export DELPHI_MAX_EVENTS=10
-sources/Code4hep/build_Code4hep/delphi_edm4hep/delphi_cmsRun \
+sources/Code4hep/build_Code4hep/delphi_edm4hep/delphiRun \
   steering/delphi_convert_cfg.py
 ```
 
@@ -69,7 +69,7 @@ The source is single-threaded at the legacy PHDST boundary. Set
 ## Scope
 
 This integration removes the runtime SKELANA lifecycle from the native path.
-`delphi_cmsRun` links no `libskelanaxx` and contains no `PSINI`/`PSBEG`. Dataset
+`delphiRun` links no `libskelanaxx` and contains no `PSINI`/`PSBEG`. Dataset
 version, magnetic field, beamspot, BTAG inputs, and the short-DST secondary
 interaction repair are called directly by the conversion pipeline. The CI job
 builds the real Code4hep/Stitched source, tests collection/metadata round trips,
