@@ -48,6 +48,7 @@ process.tpcDigis = cms.EDProducer(
     randomSeed=cms.uint32(24680),
     electronEnergyEv=cms.double(20.0),
     avalancheScale=cms.double(0.016),
+    magneticFieldTesla=cms.double(float(os.environ["C4H_FIELD_TESLA"])),
 )
 
 process.tpcHits = cms.EDProducer(

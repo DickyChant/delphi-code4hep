@@ -128,6 +128,8 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_pad_response_test \
   tpc_readout_geometry_test \
   tpc_time_response_test \
+  tpc_wire_geometry_test \
+  tpc_wire_response_test \
   delphi_geometry_audit \
   delphi_geometry_export \
   delphi_tpc_readout_audit \
@@ -193,6 +195,8 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_pad_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_readout_geometry_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_time_response_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_wire_geometry_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_wire_response_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
@@ -227,6 +231,12 @@ for expected in \
   first_row_radius_cm=36.5 \
   last_row_radius_cm=106.225 \
   drift_half_length_cm=145 \
+  sense_wires_per_sector=192 \
+  wire_spacing_cm=0.4 \
+  first_wire_radius_cm=31.05 \
+  wire_reference_cm=30.85 \
+  last_wire_radius_cm=107.45 \
+  wire_response_populations=42,916,42 \
   high_voltage_volt=25306 \
   minimum_ionizing_dedx=254.5 \
   mean_pad_amplitude=652.8 \
@@ -301,7 +311,7 @@ for tag_count in \
   '<union name=:22' \
   '<volume name=:191' \
   '<physvol name=:190' \
-  'auxtype="SensDet":1'; do
+  'auxtype="SensDet":2'; do
   tag=${tag_count%:*}
   expected_count=${tag_count##*:}
   actual_count=$(grep -c "${tag}" "${delphi_tpc_gdml}")
@@ -310,9 +320,9 @@ for tag_count in \
     exit 1
   fi
 done
-if ! grep -q 'auxtype="StepLimit" auxvalue="1" auxunit="cm"' \
+if ! grep -q 'auxtype="StepLimit" auxvalue="0.4' \
     "${delphi_tpc_gdml}"; then
-  echo "ERROR: TPC GDML is missing the DELPHI one-centimetre step limit" >&2
+  echo "ERROR: TPC GDML is missing the DELPHI 0.4 cm wire-spacing step limit" >&2
   exit 1
 fi
 
@@ -341,13 +351,13 @@ delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 )
 require_file "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
-  --expected-field 1.2312434 --min-tracker-hits 2 \
+  --expected-field 1.2312434 --min-tracker-hits 100 \
   --allow-empty-calorimeter-hits \
   "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-tpc-pad-products.py" \
-  --minimum-hits 1 "${delphi_tpc_output}"
+  --minimum-hits 50 "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-tpc-digi-products.py" \
-  --minimum-digis 1 "${delphi_tpc_output}"
+  --minimum-digis 20 "${delphi_tpc_output}"
 
 # A run/event-derived local seed must make detector response reproducible
 # without relying on DELSIM's process-global random stream.
