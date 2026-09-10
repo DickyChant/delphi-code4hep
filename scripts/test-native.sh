@@ -265,7 +265,8 @@ for expected in \
   cathode_sigma_cm=0.286 \
   jet_bad_channels=2 \
   anode_bad_channels=0 \
-  cathode_bad_channels=0; do
+  cathode_bad_channels=0 \
+  trigger_round_trip_mismatches=0; do
   if ! grep -Fqx "${expected}" <<< "${id_readout_audit}"; then
     echo "ERROR: native ID readout audit is missing '${expected}'" >&2
     exit 1
