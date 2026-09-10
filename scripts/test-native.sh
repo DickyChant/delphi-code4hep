@@ -212,7 +212,7 @@ for expected in \
   typed_geometry_nodes=7703 \
   typed_material_assignments=5424 \
   typed_shapes=6220 \
-  typed_references=4246 \
+  typed_references=5095 \
   typed_replacements=1506; do
   if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
     echo "ERROR: native geometry audit is missing '${expected}'" >&2
@@ -326,6 +326,37 @@ if ! grep -q 'auxtype="StepLimit" auxvalue="0.4' \
   exit 1
 fi
 
+# Decode the complete VD hierarchy, including its DBF MTRX placements. DUMY
+# records are structural assemblies; every SI** sensor is a sensitive volume
+# with the 10 micrometre step used by the native DELPHI simulation.
+delphi_vertex_gdml="${build_root}/delphi-v94c-vertex.gdml"
+"${code4hep_build}/delphi_edm4hep/delphi_geometry_export" --vertex \
+  "${geometry_snapshot}" "${delphi_vertex_gdml}"
+require_file "${delphi_vertex_gdml}"
+for tag_count in \
+  '<material name=:19' \
+  '<polycone name=:133' \
+  '<box name=:613' \
+  '<assembly name=:508' \
+  '<volume name=:739' \
+  '<physvol name=:1246' \
+  'auxtype="SensDet":288' \
+  'auxtype="StepLimit":288'; do
+  tag=${tag_count%:*}
+  expected_count=${tag_count##*:}
+  actual_count=$(grep -c "${tag}" "${delphi_vertex_gdml}")
+  if [[ "${actual_count}" != "${expected_count}" ]]; then
+    echo "ERROR: vertex GDML has ${actual_count} '${tag}', expected ${expected_count}" >&2
+    exit 1
+  fi
+done
+if ! grep -q \
+    'MD13_HMDA_PLP1_placement_0_position.*x="0.85519000000000001".*y="-6.4959300000000004".*z="-11.0435"' \
+    "${delphi_vertex_gdml}"; then
+  echo "ERROR: vertex GDML did not preserve the authoritative MTRX placement" >&2
+  exit 1
+fi
+
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
 g4_output="${build_root}/g4-smoke.edm4hep.root"
@@ -338,6 +369,23 @@ g4_output="${build_root}/g4-smoke.edm4hep.root"
 require_file "${g4_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
   --expected-primary-pdg 13 "${g4_output}"
+
+delphi_vertex_output="${build_root}/delphi-vertex-smoke.edm4hep.root"
+(
+  cd "${workspace}/Code4hep"
+  C4H_MAX_EVENTS=1 \
+    C4H_GDML="${delphi_vertex_gdml}" \
+    C4H_FIELD_TESLA=1.2312434 \
+    C4H_OUTPUT="${delphi_vertex_output}" \
+    cmsRun "${repo_root}/steering/delphi_vertex_sim_cfg.py" \
+      > "${build_root}/delphi-vertex-smoke.log" 2>&1
+)
+require_file "${delphi_vertex_output}"
+python3 "${repo_root}/scripts/check-g4-products.py" \
+  --expected-field 1.2312434 --min-tracker-hits 100 \
+  --expected-primary-pdg 13 \
+  --allow-empty-calorimeter-hits \
+  "${delphi_vertex_output}"
 
 delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 (

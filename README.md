@@ -85,7 +85,7 @@ relation coverage and the expected primary PDG after ROOT readback.
 The DELPHI side now has a dependency-free C++ parser and typed model for the
 authoritative CARGO/DDAPP simulation snapshot. CI reads the pinned v94c
 snapshot and requires complete decoding of 202 materials, 7,703 geometry
-nodes, 6,220 shapes, 4,246 transforms, and 1,506 replacement paths. The next
+nodes, 6,220 shapes, 5,095 transforms, and 1,506 replacement paths. The next
 simulation slice is now concrete: `delphi_geometry_export --beam-pipe` writes
 the real 680 cm by 1,170 cm `/DELF.B` world plus all 106 source nodes in the
 `/BEA*` hierarchy. It translates the subsystem's materials, nested cylindrical
@@ -132,6 +132,14 @@ boundary as the standard EDM4hep `TrackerHitSimTrackerHitLinkCollection`. CI
 requires every reconstructed hit to have resolvable, unit-normalized truth
 weights, and the repeated-run check compares waveforms, hits, and truth links
 exactly.
+
+The vertex detector is now transported from the same database rather than an
+idealized cylinder. `delphi_geometry_export --vertex` decodes the 1,137-node
+`/VD**` tree, including 508 `DUMY` assembly levels and the authoritative
+12-value `MTRX` placements. All 288 `SI**` sensor volumes are tagged sensitive
+with the native `STEPS=0.001 cm` limit. CI fixes the expanded topology and
+requires a one-muon Geant4 event to produce persistent, truth-linked silicon
+steps through those placed sensors.
 
 ## Scope
 
