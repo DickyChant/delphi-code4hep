@@ -35,6 +35,11 @@ process.sim = G4SimProducer(
     ),
 )
 
+process.trackerPartitions = cms.EDProducer(
+    "delphi_edm4hep::DelphiTrackerHitPartitionProducer",
+    simTrackerHits=cms.InputTag("sim", "SimTrackerHits"),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -42,9 +47,11 @@ process.output = cms.OutputModule(
 
 process.generation_step = cms.Path(process.gen)
 process.simulation_step = cms.Path(process.sim)
+process.partition_step = cms.Path(process.trackerPartitions)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
     process.simulation_step,
+    process.partition_step,
     process.output_step,
 )

@@ -150,7 +150,10 @@ truth-linked hits in all four tracking regions from one fixed transverse muon.
 Each sensitive logical volume carries an explicit GDML `CellIDBase`; Code4hep
 combines it with the physical copy number and persists that semantic ID instead
 of exposing hit-collection ordering. CI requires the high byte to identify VD,
-ID, TPC, or OD consistently with the transported hit position.
+ID, TPC, or OD consistently with the transported hit position. A scheduled
+`DelphiTrackerHitPartitionProducer` then publishes separate VD, ID, TPC, and OD
+`SimTrackerHitCollection` products and CI checks that their full payload and MC
+provenance survive the split.
 This is not yet a claim of a complete native pipeline: only the TPC currently
 has calibrated digitization and hit reconstruction. VD/ID/OD response,
 tracking and vertex reconstruction, the non-tracking detectors, and the final

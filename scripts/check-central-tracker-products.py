@@ -66,6 +66,24 @@ def main():
             f"mismatched_cell_ids={mismatched_cell_ids[:10]}"
         )
 
+    partition_names = {
+        "VD": "trackerPartitionsVertexSimHits",
+        "ID": "trackerPartitionsInnerDetectorSimHits",
+        "TPC": "trackerPartitionsTpcSimHits",
+        "OD": "trackerPartitionsOuterDetectorSimHits",
+    }
+    for name, collection_name in partition_names.items():
+        partition = frames[0].get(collection_name)
+        if len(partition) != counts[name]:
+            raise RuntimeError(
+                f"{name} partition has {len(partition)} hits, expected {counts[name]}"
+            )
+        for hit in partition:
+            if int(hit.getCellID()) >> 56 != SUBSYSTEM_IDS[name]:
+                raise RuntimeError(f"{name} partition contains a foreign cell ID")
+            if not hit.getParticle().isAvailable():
+                raise RuntimeError(f"{name} partition lost MC provenance")
+
     print(
         "Central-tracker transport closure passed: "
         + ", ".join(f"{name}={counts[name]}" for name in REGIONS_MM)
