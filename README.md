@@ -113,8 +113,10 @@ longitudinal diffusion, electronics shaping, the 73.82 ns clock, and the
 13-sample asymmetric pulse window while accepting its random deviates
 explicitly from the future scheduled digitizer. The calibrated two-range FADC,
 pedestal-noise decomposition, saturation, and legacy threshold window are now
-native tested kernels as well; per-pad aggregation and `TimeSeries` publication
-are the remaining framework-integration step.
+native tested kernels as well. A scheduled `DelphiTpcDigitizerProducer`
+aggregates the Geant4 steps per pad and time bin and writes the surviving
+waveforms as EDM4hep `TimeSeries`. CI validates physical thresholded waveforms
+and their DELPHI cell IDs, 73.82 ns clock, and 8-bit ADC range.
 
 ## Scope
 

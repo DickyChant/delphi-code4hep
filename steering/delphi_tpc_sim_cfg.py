@@ -41,6 +41,15 @@ process.tpcPads = cms.EDProducer(
     cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
 )
 
+process.tpcDigis = cms.EDProducer(
+    "delphi_edm4hep::DelphiTpcDigitizerProducer",
+    simTrackerHits=cms.InputTag("sim", "SimTrackerHits"),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    randomSeed=cms.uint32(24680),
+    electronEnergyEv=cms.double(20.0),
+    avalancheScale=cms.double(0.016),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -49,10 +58,12 @@ process.output = cms.OutputModule(
 process.generation_step = cms.Path(process.gen)
 process.simulation_step = cms.Path(process.sim)
 process.tpc_mapping_step = cms.Path(process.tpcPads)
+process.tpc_digitization_step = cms.Path(process.tpcDigis)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
     process.simulation_step,
     process.tpc_mapping_step,
+    process.tpc_digitization_step,
     process.output_step,
 )

@@ -164,6 +164,11 @@ if ! grep -q 'delphi_edm4hep::DelphiTpcPadMapperProducer' \
   echo "ERROR: DelphiTpcPadMapperProducer was not registered" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiTpcDigitizerProducer' \
+    "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiTpcDigitizerProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
@@ -336,6 +341,26 @@ python3 "${repo_root}/scripts/check-g4-products.py" \
   "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-tpc-pad-products.py" \
   --minimum-hits 1 "${delphi_tpc_output}"
+python3 "${repo_root}/scripts/check-tpc-digi-products.py" \
+  --minimum-digis 1 "${delphi_tpc_output}"
+
+# A run/event-derived local seed must make detector response reproducible
+# without relying on DELSIM's process-global random stream.
+delphi_tpc_repeat_output="${build_root}/delphi-tpc-repeat.edm4hep.root"
+(
+  cd "${workspace}/Code4hep"
+  C4H_MAX_EVENTS=1 \
+    C4H_GDML="${delphi_tpc_gdml}" \
+    C4H_FIELD_TESLA=1.2312434 \
+    C4H_DELPHI_CARGO="${geometry_snapshot}" \
+    C4H_OUTPUT="${delphi_tpc_repeat_output}" \
+    cmsRun "${repo_root}/steering/delphi_tpc_sim_cfg.py" \
+      > "${build_root}/delphi-tpc-repeat.log" 2>&1
+)
+require_file "${delphi_tpc_repeat_output}"
+python3 "${repo_root}/scripts/check-tpc-digi-products.py" \
+  --minimum-digis 1 --reference "${delphi_tpc_output}" \
+  "${delphi_tpc_repeat_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
