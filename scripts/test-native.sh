@@ -134,6 +134,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   vertex_digitization_conditions_test \
   delphi_geometry_audit \
   delphi_geometry_export \
+  delphi_id_readout_audit \
   delphi_tpc_readout_audit \
   delphi_vertex_readout_audit \
   bin_testCode4hepG4SimProducerTP \
@@ -236,6 +237,37 @@ for expected in \
   typed_replacements=1506; do
   if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
     echo "ERROR: native geometry audit is missing '${expected}'" >&2
+    exit 1
+  fi
+done
+id_readout_audit=$(
+  "${code4hep_build}/delphi_edm4hep/delphi_id_readout_audit" \
+    "${geometry_snapshot}"
+)
+for expected in \
+  jet_sectors=24 \
+  jet_wires_per_sector=24 \
+  jet_half_length_cm=40 \
+  jet_first_wire_radius_cm=12.5 \
+  jet_last_wire_radius_cm=21.7 \
+  trigger_layers=5 \
+  trigger_anodes_per_layer=192 \
+  trigger_cathodes_per_layer=192 \
+  trigger_first_anode_radius_cm=23.535 \
+  trigger_last_anode_radius_cm=27.415 \
+  trigger_first_cathode_radius_cm=23.92 \
+  trigger_last_cathode_radius_cm=27.8 \
+  drift_time_zero_ns=259 \
+  cathode_time_zero_ns=600 \
+  bunch_time_zero_ns=752 \
+  dead_time_us=0.055 \
+  cathode_anode_ratio=2.3875 \
+  cathode_sigma_cm=0.286 \
+  jet_bad_channels=2 \
+  anode_bad_channels=0 \
+  cathode_bad_channels=0; do
+  if ! grep -Fqx "${expected}" <<< "${id_readout_audit}"; then
+    echo "ERROR: native ID readout audit is missing '${expected}'" >&2
     exit 1
   fi
 done
