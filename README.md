@@ -187,6 +187,16 @@ every tube address/locator and requires exact fixed-seed replay on the real
 Geant4 smoke event. The historical crate/multiplexer/TDC word packing, noise,
 track-angle refinement, and quantitative ODSIM closure remain explicit work.
 
+The combined central-tracker job now also schedules the native TPC response
+and a first truth-independent helix seed. Neighboring pad responses are
+aggregated by TPC row, a deterministic circle-plus-longitudinal fit produces
+the EDM4hep perigee parameters, and the resulting `Track` retains all of its
+reconstructed TPC hit relations and fit quality. The current seed is
+interaction-point constrained and forms at most one candidate per TPC
+endcap/sector; multi-track finding, sector-boundary merging, VD/ID/OD hit
+association and ambiguity resolution, material-aware refitting, and legacy
+tracking closure are still required.
+
 This is not yet a claim of a complete native pipeline: VD, ID, TPC, and OD now
 have scheduled but differently complete digitization/reconstruction slices.
 Central tracking and vertex reconstruction, the non-tracking detectors, and

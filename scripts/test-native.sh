@@ -132,6 +132,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_wire_response_test \
   inner_detector_jet_response_test \
   outer_detector_response_test \
+  central_track_fit_test \
   vertex_channel_response_test \
   vertex_digitization_conditions_test \
   delphi_geometry_audit \
@@ -218,6 +219,11 @@ if ! grep -q 'delphi_edm4hep::DelphiOuterDetectorHitReconstructionProducer' \
   echo "ERROR: DelphiOuterDetectorHitReconstructionProducer was not registered" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiCentralTrackFitProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiCentralTrackFitProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
@@ -241,6 +247,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/inner_detector_jet_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/outer_detector_response_test"
+"${code4hep_build}/delphi_edm4hep/tests/central_track_fit_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_channel_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_digitization_conditions_test"
 
@@ -559,6 +566,7 @@ python3 "${repo_root}/scripts/check-g4-products.py" \
   --allow-empty-calorimeter-hits \
   "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-central-tracker-products.py" \
+  --min-od-hits 5 \
   "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
@@ -566,6 +574,10 @@ python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-outer-detector-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-tpc-digi-products.py" \
+  --minimum-digis 20 "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-central-track-fit-products.py" \
+  --minimum-tracks 1 "${delphi_tracking_output}"
 
 delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root"
 (
@@ -587,6 +599,12 @@ python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
   "${delphi_tracking_repeat_output}"
 python3 "${repo_root}/scripts/check-outer-detector-digi-products.py" \
   --minimum-digis 1 --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-tpc-digi-products.py" \
+  --minimum-digis 1 --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-central-track-fit-products.py" \
+  --minimum-tracks 1 --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 
 delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"

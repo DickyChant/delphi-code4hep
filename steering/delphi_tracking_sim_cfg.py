@@ -19,8 +19,8 @@ process.gen = GenProducer(
     PartID=cms.untracked.int32(13),
     MinPt=cms.double(10.0),
     MaxPt=cms.double(10.0),
-    MinEta=cms.double(0.0),
-    MaxEta=cms.double(0.0),
+    MinEta=cms.double(0.5),
+    MaxEta=cms.double(0.5),
     MinPhi=cms.double(0.0),
     MaxPhi=cms.double(0.0),
 )
@@ -79,6 +79,32 @@ process.innerDetectorHits = cms.EDProducer(
     transverseResolutionCm=cms.double(0.0100),
 )
 
+process.tpcDigis = cms.EDProducer(
+    "delphi_edm4hep::DelphiTpcDigitizerProducer",
+    simTrackerHits=cms.InputTag("trackerPartitions", "TpcSimHits"),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    randomSeed=cms.uint32(24680),
+    electronEnergyEv=cms.double(20.0),
+    avalancheScale=cms.double(0.016),
+    magneticFieldTesla=cms.double(float(os.environ["C4H_FIELD_TESLA"])),
+)
+
+process.tpcHits = cms.EDProducer(
+    "delphi_edm4hep::DelphiTpcHitReconstructionProducer",
+    digis=cms.InputTag("tpcDigis", "TpcDigis"),
+    digiTruthLinks=cms.InputTag("tpcDigis", "TpcDigiSimTrackerHitLinks"),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+)
+
+process.centralTracks = cms.EDProducer(
+    "delphi_edm4hep::DelphiCentralTrackFitProducer",
+    tpcHits=cms.InputTag("tpcHits", "TpcHits"),
+    minimumRows=cms.uint32(8),
+    transverseSigmaMm=cms.double(5.0),
+    longitudinalSigmaMm=cms.double(10.0),
+    constrainToInteractionPoint=cms.bool(True),
+)
+
 process.outerDetectorDigis = cms.EDProducer(
     "delphi_edm4hep::DelphiOuterDetectorDigitizerProducer",
     simTrackerHits=cms.InputTag(
@@ -113,6 +139,9 @@ process.inner_detector_digitization_step = cms.Path(
 process.inner_detector_reconstruction_step = cms.Path(
     process.innerDetectorHits
 )
+process.tpc_digitization_step = cms.Path(process.tpcDigis)
+process.tpc_reconstruction_step = cms.Path(process.tpcHits)
+process.central_track_fit_step = cms.Path(process.centralTracks)
 process.outer_detector_digitization_step = cms.Path(
     process.outerDetectorDigis
 )
@@ -128,6 +157,9 @@ process.schedule = cms.Schedule(
     process.vertex_reconstruction_step,
     process.inner_detector_digitization_step,
     process.inner_detector_reconstruction_step,
+    process.tpc_digitization_step,
+    process.tpc_reconstruction_step,
+    process.central_track_fit_step,
     process.outer_detector_digitization_step,
     process.outer_detector_reconstruction_step,
     process.output_step,
