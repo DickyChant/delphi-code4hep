@@ -175,11 +175,22 @@ digits, and reconstructs both left/right drift hypotheses with truth links.
 The trigger layers, charge/noise response, ambiguity resolution, and legacy
 closure are still outstanding.
 
-This is not yet a claim of a complete native pipeline: VD, ID, and TPC now have
-scheduled but differently complete digitization/reconstruction slices. OD
-response, central tracking and vertex reconstruction, the non-tracking
-detectors, and the final replacement of the PHDST/DSTANA input boundary
-remain.
+The Outer Detector now has the corresponding scheduled response seam. Its
+native C++ readout reconstructs all 3,480 physical tubes from the measured
+v94c survey and per-tube calibration, including the staggered five-layer
+planks and wire sag. The response ports ODSIM's laser-data drift polynomials,
+applies the calibrated pedestal, z-propagation delay, pulse width, efficiency,
+100 micrometre transverse resolution, and 5.49 cm z resolution, then writes
+versioned physical-channel digits. Reconstruction publishes both left/right
+three-dimensional planar-hit hypotheses and standard truth links. CI audits
+every tube address/locator and requires exact fixed-seed replay on the real
+Geant4 smoke event. The historical crate/multiplexer/TDC word packing, noise,
+track-angle refinement, and quantitative ODSIM closure remain explicit work.
+
+This is not yet a claim of a complete native pipeline: VD, ID, TPC, and OD now
+have scheduled but differently complete digitization/reconstruction slices.
+Central tracking and vertex reconstruction, the non-tracking detectors, and
+the final replacement of the PHDST/DSTANA input boundary remain.
 
 ## Scope
 

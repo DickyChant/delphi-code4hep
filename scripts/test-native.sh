@@ -131,11 +131,13 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_wire_geometry_test \
   tpc_wire_response_test \
   inner_detector_jet_response_test \
+  outer_detector_response_test \
   vertex_channel_response_test \
   vertex_digitization_conditions_test \
   delphi_geometry_audit \
   delphi_geometry_export \
   delphi_id_readout_audit \
+  delphi_od_readout_audit \
   delphi_tpc_readout_audit \
   delphi_vertex_readout_audit \
   bin_testCode4hepG4SimProducerTP \
@@ -206,6 +208,16 @@ if ! grep -q 'delphi_edm4hep::DelphiInnerDetectorHitReconstructionProducer' \
   echo "ERROR: DelphiInnerDetectorHitReconstructionProducer was not registered" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiOuterDetectorDigitizerProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiOuterDetectorDigitizerProducer was not registered" >&2
+  exit 1
+fi
+if ! grep -q 'delphi_edm4hep::DelphiOuterDetectorHitReconstructionProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiOuterDetectorHitReconstructionProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
@@ -228,6 +240,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_geometry_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/inner_detector_jet_response_test"
+"${code4hep_build}/delphi_edm4hep/tests/outer_detector_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_channel_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_digitization_conditions_test"
 
@@ -288,6 +301,36 @@ for expected in \
   trigger_round_trip_mismatches=0; do
   if ! grep -Fqx "${expected}" <<< "${id_readout_audit}"; then
     echo "ERROR: native ID readout audit is missing '${expected}'" >&2
+    exit 1
+  fi
+done
+od_readout_audit=$(
+  "${code4hep_build}/delphi_edm4hep/delphi_od_readout_audit" \
+    "${geometry_snapshot}"
+)
+for expected in \
+  tubes=3480 \
+  planks=24 \
+  layers=5 \
+  wires_per_plank=145 \
+  cell_pitch_x_cm=1.745 \
+  layer_pitch_y_cm=1.75 \
+  gas_width_cm=1.645 \
+  gas_height_cm=1.645 \
+  active_channels=3480 \
+  minimum_efficiency=1 \
+  maximum_efficiency=1 \
+  first_channel=1:1:2 \
+  last_channel=24:5:29 \
+  first_pedestal_ns=132.14 \
+  first_z_propagation_ns=15 \
+  first_pulse_width_ns=45.2 \
+  drift_0p5cm_0deg_ns=97.4548 \
+  drift_0p5cm_45deg_ns=97.6832 \
+  address_round_trip_mismatches=0 \
+  wire_locator_mismatches=0; do
+  if ! grep -Fqx "${expected}" <<< "${od_readout_audit}"; then
+    echo "ERROR: native OD readout audit is missing '${expected}'" >&2
     exit 1
   fi
 done
@@ -521,6 +564,8 @@ python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-outer-detector-digi-products.py" \
+  --minimum-digis 1 "${delphi_tracking_output}"
 
 delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root"
 (
@@ -538,6 +583,9 @@ python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
   --minimum-digis 1 --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
+  --minimum-digis 1 --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-outer-detector-digi-products.py" \
   --minimum-digis 1 --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 

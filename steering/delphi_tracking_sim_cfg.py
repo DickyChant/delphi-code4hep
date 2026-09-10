@@ -79,6 +79,24 @@ process.innerDetectorHits = cms.EDProducer(
     transverseResolutionCm=cms.double(0.0100),
 )
 
+process.outerDetectorDigis = cms.EDProducer(
+    "delphi_edm4hep::DelphiOuterDetectorDigitizerProducer",
+    simTrackerHits=cms.InputTag(
+        "trackerPartitions", "OuterDetectorSimHits"
+    ),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    randomSeed=cms.uint32(97531),
+)
+
+process.outerDetectorHits = cms.EDProducer(
+    "delphi_edm4hep::DelphiOuterDetectorHitReconstructionProducer",
+    digis=cms.InputTag("outerDetectorDigis", "OuterDetectorDigis"),
+    digiTruthLinks=cms.InputTag(
+        "outerDetectorDigis", "OuterDetectorDigiSimTrackerHitLinks"
+    ),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -95,6 +113,12 @@ process.inner_detector_digitization_step = cms.Path(
 process.inner_detector_reconstruction_step = cms.Path(
     process.innerDetectorHits
 )
+process.outer_detector_digitization_step = cms.Path(
+    process.outerDetectorDigis
+)
+process.outer_detector_reconstruction_step = cms.Path(
+    process.outerDetectorHits
+)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
@@ -104,5 +128,7 @@ process.schedule = cms.Schedule(
     process.vertex_reconstruction_step,
     process.inner_detector_digitization_step,
     process.inner_detector_reconstruction_step,
+    process.outer_detector_digitization_step,
+    process.outer_detector_reconstruction_step,
     process.output_step,
 )
