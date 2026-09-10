@@ -241,11 +241,14 @@ for expected in \
   n_side_sensors=192 \
   central_sensors=144 \
   inner_odd_512_channel_sensors=48 \
+  readout_addresses=319488 \
   'sensor22_path=/VD**/HSL*/CLLA/MD18/HMDA/PLP2.B' \
   sensor22_x_cm=6.10531 \
   sensor22_y_cm=-0.80379 \
   sensor22_z_cm=-3.715 \
   sensor22_p_active_length_cm=7.5933 \
+  sensor22_p_electronics=17:1153-1536 \
+  sensor22_n_electronics=17:1152-769 \
   transform_round_trip_mismatches=0; do
   if ! grep -Fqx "${expected}" <<< "${vertex_readout_audit}"; then
     echo "ERROR: native VD readout audit is missing '${expected}'" >&2

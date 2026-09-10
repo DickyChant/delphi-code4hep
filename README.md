@@ -146,8 +146,9 @@ conditions encode the v94c 24/24/24-module readout, odd/even inner P channels,
 the closer two-pitch N zone, the outer N layouts, noise, thresholds and ADC
 calibration. `VertexReadoutGeometry` binds them to all 288 semantic sensor IDs,
 their P/N `MTRX` transforms and CARGO `USER` active lines. The snapshot audit
-checks the full catalogue and coordinate/cell-ID round trips. Strip charge
-sharing, raw digitization and clustering remain the next VD slice.
+checks the full catalogue, all 319,488 v94c `SVELCH` electronics addresses,
+and coordinate/cell-ID round trips. Strip charge sharing, raw digitization and
+clustering remain the next VD slice.
 
 The same renderer now completes the central-tracker transport boundary.
 `--id` reconstructs the inner detector's DELPHI `FORB` cells, `--od`
