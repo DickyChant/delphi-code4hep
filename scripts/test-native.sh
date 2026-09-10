@@ -269,6 +269,7 @@ for expected in \
   jet_s1_w1_left_edge_ns=1940.97 \
   jet_s1_w1_right_edge_ns=1846.08 \
   jet_max_drift_time_ns=1940.97 \
+  jet_drift_gap_clamps=24 \
   jet_bad_channels=2 \
   anode_bad_channels=0 \
   cathode_bad_channels=0 \
