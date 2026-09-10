@@ -29,7 +29,33 @@ def payload(path):
         if not any(value >= 20 for value in samples):
             raise RuntimeError("zero-suppressed TPC cluster has no threshold sample")
         result.append((cell, digi.getTime(), digi.getInterval(), samples))
-    return result
+    hits = frames[0].get("tpcHitsTpcHits")
+    if len(hits) != len(digis):
+        raise RuntimeError(
+            f"TPC waveform/hit count mismatch: {len(digis)} != {len(hits)}"
+        )
+    hit_result = []
+    waveform_cells = {entry[0] for entry in result}
+    for hit in hits:
+        raw_position = hit.getPosition()
+        position = (raw_position[0], raw_position[1], raw_position[2])
+        radius = math.hypot(position[0], position[1])
+        if not (300 < radius < 1200 and abs(position[2]) <= 1450):
+            raise RuntimeError(f"invalid reconstructed TPC position: {position}")
+        if hit.getCellID() not in waveform_cells:
+            raise RuntimeError("reconstructed TPC hit has no waveform")
+        if not math.isfinite(hit.getTime()):
+            raise RuntimeError("invalid reconstructed TPC hit time")
+        covariance = hit.getCovMatrix()
+        hit_result.append(
+            (
+                hit.getCellID(),
+                hit.getTime(),
+                position,
+                tuple(covariance[index] for index in range(6)),
+            )
+        )
+    return result, hit_result
 
 
 def main():
@@ -39,14 +65,19 @@ def main():
     parser.add_argument("--reference")
     args = parser.parse_args()
 
-    digis = payload(args.file)
+    digis, hits = payload(args.file)
     if len(digis) < args.minimum_digis:
         raise RuntimeError(
             f"expected at least {args.minimum_digis} TPC digis, found {len(digis)}"
         )
-    if args.reference and digis != payload(args.reference):
-        raise RuntimeError("TPC digitization is not reproducible for the fixed seed")
-    print(f"TPC digitization closure passed: {len(digis)} waveforms")
+    if args.reference and (digis, hits) != payload(args.reference):
+        raise RuntimeError(
+            "TPC digitization/reconstruction is not reproducible for the fixed seed"
+        )
+    print(
+        f"TPC digitization closure passed: {len(digis)} waveforms, "
+        f"{len(hits)} reconstructed hits"
+    )
 
 
 if __name__ == "__main__":

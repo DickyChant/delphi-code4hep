@@ -169,6 +169,11 @@ if ! grep -q 'delphi_edm4hep::DelphiTpcDigitizerProducer' \
   echo "ERROR: DelphiTpcDigitizerProducer was not registered" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiTpcHitReconstructionProducer' \
+    "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiTpcHitReconstructionProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2

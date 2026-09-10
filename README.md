@@ -116,7 +116,11 @@ pedestal-noise decomposition, saturation, and legacy threshold window are now
 native tested kernels as well. A scheduled `DelphiTpcDigitizerProducer`
 aggregates the Geant4 steps per pad and time bin and writes the surviving
 waveforms as EDM4hep `TimeSeries`. CI validates physical thresholded waveforms
-and their DELPHI cell IDs, 73.82 ns clock, and 8-bit ADC range.
+and their DELPHI cell IDs, 73.82 ns clock, and 8-bit ADC range. A following
+`DelphiTpcHitReconstructionProducer` converts each waveform peak back to a
+calibrated pad-centre and drift-z `TrackerHit3D`, including channel quality and
+position covariance. The repeated-run CI compares both waveform and hit
+payloads exactly.
 
 ## Scope
 
