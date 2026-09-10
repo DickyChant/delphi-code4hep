@@ -141,6 +141,14 @@ with the native `STEPS=0.001 cm` limit. CI fixes the expanded topology and
 requires a one-muon Geant4 event to produce persistent, truth-linked silicon
 steps through those placed sensors.
 
+The first VD response layer is also native. Release-matched VDSIM 4.6
+conditions encode the v94c 24/24/24-module readout, odd/even inner P channels,
+the closer two-pitch N zone, the outer N layouts, noise, thresholds and ADC
+calibration. `VertexReadoutGeometry` binds them to all 288 semantic sensor IDs,
+their P/N `MTRX` transforms and CARGO `USER` active lines. The snapshot audit
+checks the full catalogue and coordinate/cell-ID round trips. Strip charge
+sharing, raw digitization and clustering remain the next VD slice.
+
 The same renderer now completes the central-tracker transport boundary.
 `--id` reconstructs the inner detector's DELPHI `FORB` cells, `--od`
 reconstructs the outer detector's segmented hollow `POL4` layers, and
@@ -171,6 +179,7 @@ registers `DelphiSource`, and audits the final launcher link.
 The remaining legacy dependency is PHDST/DSTANA itself; removing that would be
 a separate raw-bank reader rewrite, not a SKELANA refactor. Design and
 validation evidence are documented in
-`delphi-edm4hep/docs/no-skelana-migration.md`.
+`delphi-edm4hep/docs/no-skelana-migration.md`; the end-to-end replacement map
+is in `delphi-edm4hep/docs/native-code4hep-pipeline.md`.
 
 No pull request is created by any script in this repository.

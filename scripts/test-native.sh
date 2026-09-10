@@ -135,6 +135,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   delphi_geometry_audit \
   delphi_geometry_export \
   delphi_tpc_readout_audit \
+  delphi_vertex_readout_audit \
   bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
 
@@ -225,6 +226,29 @@ for expected in \
   typed_replacements=1506; do
   if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
     echo "ERROR: native geometry audit is missing '${expected}'" >&2
+    exit 1
+  fi
+done
+vertex_readout_audit=$(
+  "${code4hep_build}/delphi_edm4hep/delphi_vertex_readout_audit" \
+    "${geometry_snapshot}"
+)
+for expected in \
+  sensors=288 \
+  closer_sensors=96 \
+  inner_sensors=96 \
+  outer_sensors=96 \
+  n_side_sensors=192 \
+  central_sensors=144 \
+  inner_odd_512_channel_sensors=48 \
+  'sensor22_path=/VD**/HSL*/CLLA/MD18/HMDA/PLP2.B' \
+  sensor22_x_cm=6.10531 \
+  sensor22_y_cm=-0.80379 \
+  sensor22_z_cm=-3.715 \
+  sensor22_p_active_length_cm=7.5933 \
+  transform_round_trip_mismatches=0; do
+  if ! grep -Fqx "${expected}" <<< "${vertex_readout_audit}"; then
+    echo "ERROR: native VD readout audit is missing '${expected}'" >&2
     exit 1
   fi
 done
