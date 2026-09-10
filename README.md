@@ -88,9 +88,11 @@ the real 680 cm by 1,170 cm `/DELF.B` world plus all 106 source nodes in the
 `/BEA*` hierarchy. It translates the subsystem's materials, nested cylindrical
 and brick shapes, placements, and replacement-inherited mask children. CI
 checks the exact expanded topology and transports one event through it at the
-v94c 1.2312434 T central field. The bundled example remains the sensitive-hit
-framework test while tracker/calorimeter geometry and digitizers are added
-incrementally.
+v94c 1.2312434 T central field. The same native renderer now adds all 81 TPC
+nodes, translates its 36 `POL6` endplate sectors to closed tessellated solids,
+and marks the gas volume tracker-sensitive. CI requires that authoritative
+geometry to produce physical persistent tracker-hit content; calorimeter
+geometry and detector digitizers are added incrementally.
 
 ## Scope
 

@@ -11,6 +11,8 @@ def main():
     parser.add_argument("file")
     parser.add_argument("--expected-field", type=float, default=0.1)
     parser.add_argument("--allow-empty-hits", action="store_true")
+    parser.add_argument("--allow-empty-tracker-hits", action="store_true")
+    parser.add_argument("--allow-empty-calorimeter-hits", action="store_true")
     args = parser.parse_args()
 
     frames = list(root_io.Reader(args.file).get("events"))
@@ -26,13 +28,13 @@ def main():
         "sim_detector_magneticFieldTesla"
     )
 
-    if not args.allow_empty_hits and (
+    if not (args.allow_empty_hits or args.allow_empty_tracker_hits) and (
         len(tracker_hits) == 0 or tracker_energy <= 0 or tracker_path <= 0
     ):
         raise RuntimeError(
             "simulation did not produce physical tracker-hit content"
         )
-    if not args.allow_empty_hits and (
+    if not (args.allow_empty_hits or args.allow_empty_calorimeter_hits) and (
         len(calorimeter_hits) == 0 or calorimeter_energy <= 0
     ):
         raise RuntimeError(

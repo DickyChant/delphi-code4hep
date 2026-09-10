@@ -229,6 +229,31 @@ if ! grep -q 'MSK1_placement_0_rotation.*x="-180".*z="-90"' \
   exit 1
 fi
 
+# Add the complete TPC tree. Its POL6 sectors are native closed tessellated
+# solids, and the TPC gas itself must be registered as tracker-sensitive.
+delphi_tpc_gdml="${build_root}/delphi-v94c-tpc.gdml"
+"${code4hep_build}/delphi_edm4hep/delphi_geometry_export" --tpc \
+  "${geometry_snapshot}" "${delphi_tpc_gdml}"
+require_file "${delphi_tpc_gdml}"
+for tag_count in \
+  '<material name=:26' \
+  '<polycone name=:175' \
+  '<box name=:1' \
+  '<tessellated name=:36' \
+  '<triangular vertex1=:720' \
+  '<union name=:22' \
+  '<volume name=:191' \
+  '<physvol name=:190' \
+  'auxtype="SensDet":1'; do
+  tag=${tag_count%:*}
+  expected_count=${tag_count##*:}
+  actual_count=$(grep -c "${tag}" "${delphi_tpc_gdml}")
+  if [[ "${actual_count}" != "${expected_count}" ]]; then
+    echo "ERROR: TPC GDML has ${actual_count} '${tag}', expected ${expected_count}" >&2
+    exit 1
+  fi
+done
+
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
 g4_output="${build_root}/g4-smoke.edm4hep.root"
@@ -241,19 +266,20 @@ g4_output="${build_root}/g4-smoke.edm4hep.root"
 require_file "${g4_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" "${g4_output}"
 
-delphi_beam_pipe_output="${build_root}/delphi-beam-pipe-smoke.edm4hep.root"
+delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 (
   cd "${workspace}/Code4hep"
   C4H_MAX_EVENTS=1 \
-    C4H_GDML="${delphi_beam_pipe_gdml}" \
+    C4H_GDML="${delphi_tpc_gdml}" \
     C4H_FIELD_TESLA=1.2312434 \
-    C4H_OUTPUT="${delphi_beam_pipe_output}" \
+    C4H_OUTPUT="${delphi_tpc_output}" \
     cmsRun Code4hep/G4Application/python/hepmc3-sim_cfg.py \
-      > "${build_root}/delphi-beam-pipe-smoke.log" 2>&1
+      > "${build_root}/delphi-tpc-smoke.log" 2>&1
 )
-require_file "${delphi_beam_pipe_output}"
+require_file "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
-  --expected-field 1.2312434 --allow-empty-hits "${delphi_beam_pipe_output}"
+  --expected-field 1.2312434 --allow-empty-calorimeter-hits \
+  "${delphi_tpc_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
