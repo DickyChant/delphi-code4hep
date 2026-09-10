@@ -242,6 +242,8 @@ for expected in \
   central_sensors=144 \
   inner_odd_512_channel_sensors=48 \
   readout_addresses=319488 \
+  strip_round_trip_mismatches=0 \
+  strip_mismatch_breakdown=0,0,0,0,0,0 \
   'sensor22_path=/VD**/HSL*/CLLA/MD18/HMDA/PLP2.B' \
   sensor22_x_cm=6.10531 \
   sensor22_y_cm=-0.80379 \
