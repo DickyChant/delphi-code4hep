@@ -121,7 +121,9 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   particle_counts_test \
   cargo_database_test \
   geometry_model_test \
+  gdml_world_writer_test \
   delphi_geometry_audit \
+  delphi_geometry_export \
   bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
 
@@ -162,6 +164,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/particle_counts_test"
 "${code4hep_build}/delphi_edm4hep/tests/cargo_database_test"
 "${code4hep_build}/delphi_edm4hep/tests/geometry_model_test"
+"${code4hep_build}/delphi_edm4hep/tests/gdml_world_writer_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
@@ -185,6 +188,18 @@ for expected in \
   fi
 done
 
+# Render the actual v94c DELF world boundary and prove that the generated GDML
+# is accepted by the Code4hep Geant4 path at the DELSIM central field. Child
+# detector volumes are intentionally not claimed by this first renderer.
+delphi_world_gdml="${build_root}/delphi-v94c-world.gdml"
+"${code4hep_build}/delphi_edm4hep/delphi_geometry_export" \
+  "${geometry_snapshot}" "${delphi_world_gdml}"
+require_file "${delphi_world_gdml}"
+if ! grep -q 'rmax="680" z="1170"' "${delphi_world_gdml}"; then
+  echo "ERROR: exported DELPHI world has the wrong primary bounds" >&2
+  exit 1
+fi
+
 # The framework's simulation path must produce persistent EDM4hep hits, not
 # merely process and discard a G4Event. Use the lightweight one-muon source.
 g4_output="${build_root}/g4-smoke.edm4hep.root"
@@ -196,6 +211,20 @@ g4_output="${build_root}/g4-smoke.edm4hep.root"
 )
 require_file "${g4_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" "${g4_output}"
+
+delphi_world_output="${build_root}/delphi-world-smoke.edm4hep.root"
+(
+  cd "${workspace}/Code4hep"
+  C4H_MAX_EVENTS=1 \
+    C4H_GDML="${delphi_world_gdml}" \
+    C4H_FIELD_TESLA=1.2312434 \
+    C4H_OUTPUT="${delphi_world_output}" \
+    cmsRun Code4hep/G4Application/python/hepmc3-sim_cfg.py \
+      > "${build_root}/delphi-world-smoke.log" 2>&1
+)
+require_file "${delphi_world_output}"
+python3 "${repo_root}/scripts/check-g4-products.py" \
+  --expected-field 1.2312434 --allow-empty-hits "${delphi_world_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"

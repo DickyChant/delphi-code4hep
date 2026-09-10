@@ -83,9 +83,11 @@ The DELPHI side now has a dependency-free C++ parser and typed model for the
 authoritative CARGO/DDAPP simulation snapshot. CI reads the pinned v94c
 snapshot and requires complete decoding of 202 materials, 7,703 geometry
 nodes, 6,220 shapes, 4,246 transforms, and 1,506 replacement paths. The next
-simulation slice is translating that validated model into DD4hep/GDML and
-adding detector-specific digitizers; the bundled GDML remains a framework
-test, not a DELPHI detector model.
+simulation slice has begun: `delphi_geometry_export` writes the real 680 cm by
+1,170 cm `/DELF.B` world and AIR material to GDML, and CI transports one event
+through it at the v94c 1.2312434 T central field. No child detector is claimed
+yet; the bundled example remains the sensitive-hit framework test while beam
+pipe, tracker/calorimeter geometry, and digitizers are added incrementally.
 
 ## Scope
 

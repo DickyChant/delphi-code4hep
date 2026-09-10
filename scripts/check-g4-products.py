@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 
-import sys
+import argparse
 from math import isclose
 
 from podio import root_io
 
 
 def main():
-    if len(sys.argv) != 2:
-        raise SystemExit(f"usage: {sys.argv[0]} FILE.edm4hep.root")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file")
+    parser.add_argument("--expected-field", type=float, default=0.1)
+    parser.add_argument("--allow-empty-hits", action="store_true")
+    args = parser.parse_args()
 
-    frames = list(root_io.Reader(sys.argv[1]).get("events"))
+    frames = list(root_io.Reader(args.file).get("events"))
     if len(frames) != 1:
         raise RuntimeError(f"expected one simulation event, found {len(frames)}")
 
@@ -23,15 +26,21 @@ def main():
         "sim_detector_magneticFieldTesla"
     )
 
-    if len(tracker_hits) == 0 or tracker_energy <= 0 or tracker_path <= 0:
+    if not args.allow_empty_hits and (
+        len(tracker_hits) == 0 or tracker_energy <= 0 or tracker_path <= 0
+    ):
         raise RuntimeError(
             "simulation did not produce physical tracker-hit content"
         )
-    if len(calorimeter_hits) == 0 or calorimeter_energy <= 0:
+    if not args.allow_empty_hits and (
+        len(calorimeter_hits) == 0 or calorimeter_energy <= 0
+    ):
         raise RuntimeError(
             "simulation did not produce physical calorimeter-hit content"
         )
-    if not isclose(magnetic_field, 0.1, rel_tol=0.0, abs_tol=1.0e-12):
+    if not isclose(
+        magnetic_field, args.expected_field, rel_tol=0.0, abs_tol=1.0e-12
+    ):
         raise RuntimeError(
             "simulation magnetic-field provenance is missing or wrong: "
             f"{magnetic_field}"
