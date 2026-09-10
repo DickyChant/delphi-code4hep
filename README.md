@@ -92,7 +92,15 @@ v94c 1.2312434 T central field. The same native renderer now adds all 81 TPC
 nodes, translates its 36 `POL6` endplate sectors to closed tessellated solids,
 and marks the gas volume tracker-sensitive. CI requires that authoritative
 geometry to produce physical persistent tracker-hit content; calorimeter
-geometry and detector digitizers are added incrementally.
+geometry and detector digitizers are added incrementally. The same v94c CARGO
+snapshot now defines the TPC readout boundary as well: 16 calibrated pad rows,
+1,680 pads per sector, and all 12 sector transforms. A scheduled
+`DelphiTpcPadMapperProducer` applies the legacy STAMPA pad-number convention to
+Geant4 step positions and writes ordinary `TrackerHit3D` products. CI transports
+one event through the DELPHI TPC, requires mapped pad hits with valid cell IDs,
+and checks the authoritative 20,160-pad topology. This is geometrical channel
+mapping; drift, diffusion, charge sharing, thresholds, and ADC response remain
+the next TPC digitization layer.
 
 ## Scope
 

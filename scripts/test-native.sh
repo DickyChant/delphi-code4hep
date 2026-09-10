@@ -123,8 +123,10 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   geometry_model_test \
   gdml_world_writer_test \
   gdml_beam_pipe_writer_test \
+  tpc_readout_geometry_test \
   delphi_geometry_audit \
   delphi_geometry_export \
+  delphi_tpc_readout_audit \
   bin_testCode4hepG4SimProducerTP \
   bin_testCode4hepIOCatch2
 
@@ -153,6 +155,11 @@ if ! grep -q 'delphi_edm4hep::DelphiEventSummaryProducer' \
   echo "ERROR: DelphiEventSummaryProducer was not registered in the plugin cache" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiTpcPadMapperProducer' \
+    "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiTpcPadMapperProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
@@ -167,6 +174,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/geometry_model_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_world_writer_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_beam_pipe_writer_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_readout_geometry_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
@@ -186,6 +194,23 @@ for expected in \
   typed_replacements=1506; do
   if ! grep -qx "${expected}" <<< "${geometry_audit}"; then
     echo "ERROR: native geometry audit is missing '${expected}'" >&2
+    exit 1
+  fi
+done
+tpc_readout_audit=$(
+  "${code4hep_build}/delphi_edm4hep/delphi_tpc_readout_audit" \
+    "${geometry_snapshot}"
+)
+for expected in \
+  rows=16 \
+  pads_per_sector=1680 \
+  total_pads=20160 \
+  sectors=12 \
+  first_row_radius_cm=36.5 \
+  last_row_radius_cm=106.225 \
+  centre_pad_mismatches=0; do
+  if ! grep -qx "${expected}" <<< "${tpc_readout_audit}"; then
+    echo "ERROR: native TPC readout audit is missing '${expected}'" >&2
     exit 1
   fi
 done
@@ -277,8 +302,9 @@ delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
   C4H_MAX_EVENTS=1 \
     C4H_GDML="${delphi_tpc_gdml}" \
     C4H_FIELD_TESLA=1.2312434 \
+    C4H_DELPHI_CARGO="${geometry_snapshot}" \
     C4H_OUTPUT="${delphi_tpc_output}" \
-    cmsRun Code4hep/G4Application/python/hepmc3-sim_cfg.py \
+    cmsRun "${repo_root}/steering/delphi_tpc_sim_cfg.py" \
       > "${build_root}/delphi-tpc-smoke.log" 2>&1
 )
 require_file "${delphi_tpc_output}"
@@ -286,6 +312,8 @@ python3 "${repo_root}/scripts/check-g4-products.py" \
   --expected-field 1.2312434 --min-tracker-hits 2 \
   --allow-empty-calorimeter-hits \
   "${delphi_tpc_output}"
+python3 "${repo_root}/scripts/check-tpc-pad-products.py" \
+  --minimum-hits 1 "${delphi_tpc_output}"
 
 launcher="${code4hep_build}/delphi_edm4hep/delphiRun"
 require_file "${launcher}"
