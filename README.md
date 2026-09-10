@@ -108,7 +108,10 @@ already supplies those layers with the v94c high voltage, dE/dx and pad-gain
 normalizations, both endcap drift velocities, and all packed sector gate
 states directly from CARGO. It also expands the complete 20,160-channel packed
 pad calibration into electronics channel, pedestal, two-range slope, gain
-ratio, crossover, and status values.
+ratio, crossover, and status values. The native STDIPW response now adds
+longitudinal diffusion, electronics shaping, the 73.82 ns clock, and the
+13-sample asymmetric pulse window while accepting its random deviates
+explicitly from the future scheduled digitizer.
 
 ## Scope
 

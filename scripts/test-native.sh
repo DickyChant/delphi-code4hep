@@ -126,6 +126,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_digitization_conditions_test \
   tpc_pad_response_test \
   tpc_readout_geometry_test \
+  tpc_time_response_test \
   delphi_geometry_audit \
   delphi_geometry_export \
   delphi_tpc_readout_audit \
@@ -179,6 +180,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_digitization_conditions_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_pad_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_readout_geometry_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_time_response_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
 require_file "${geometry_snapshot}"
@@ -223,6 +225,8 @@ for expected in \
   nonzero_pad_statuses=736 \
   minimum_gain_ratio=4.052 \
   maximum_gain_ratio=5.286 \
+  time_response_bins=13 \
+  time_response_peak_bin=87 \
   centre_pad_mismatches=0 \
   stampa_response_mismatches=0; do
   if ! grep -qx "${expected}" <<< "${tpc_readout_audit}"; then
