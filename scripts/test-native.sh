@@ -130,6 +130,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_time_response_test \
   tpc_wire_geometry_test \
   tpc_wire_response_test \
+  inner_detector_jet_response_test \
   vertex_channel_response_test \
   vertex_digitization_conditions_test \
   delphi_geometry_audit \
@@ -193,6 +194,16 @@ fi
 if ! grep -q 'delphi_edm4hep::DelphiVertexHitReconstructionProducer' \
   "${plugin_dir}/.edmplugincache"; then
   echo "ERROR: DelphiVertexHitReconstructionProducer was not registered" >&2
+  exit 1
+fi
+if ! grep -q 'delphi_edm4hep::DelphiInnerDetectorDigitizerProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiInnerDetectorDigitizerProducer was not registered" >&2
+  exit 1
+fi
+if ! grep -q 'delphi_edm4hep::DelphiInnerDetectorHitReconstructionProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiInnerDetectorHitReconstructionProducer was not registered" >&2
   exit 1
 fi
 for plugin in GenProducer G4SimProducer; do
@@ -270,6 +281,7 @@ for expected in \
   jet_s1_w1_right_edge_ns=1846.08 \
   jet_max_drift_time_ns=1940.97 \
   jet_drift_gap_clamps=24 \
+  jet_address_round_trip_mismatches=0 \
   jet_bad_channels=2 \
   anode_bad_channels=0 \
   cathode_bad_channels=0 \
@@ -507,6 +519,8 @@ python3 "${repo_root}/scripts/check-central-tracker-products.py" \
   "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
   --minimum-digis 1 "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
+  --minimum-digis 1 "${delphi_tracking_output}"
 
 delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root"
 (
@@ -521,6 +535,9 @@ delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root
 )
 require_file "${delphi_tracking_repeat_output}"
 python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
+  --minimum-digis 1 --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-inner-detector-digi-products.py" \
   --minimum-digis 1 --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 
@@ -588,14 +605,14 @@ done
 # uses fixed scratch names such as PDLINPUT and fort.3.
 fixture="${repo_root}/testdata/pythia8_94c2_one_event.fadana"
 require_file "${fixture}"
-runtime_dir="${build_root}/delphiRun-smoke"
-mkdir -p "${runtime_dir}"
+runtime_dir=$(mktemp -d "${build_root}/delphiRun-smoke.XXXXXX")
 export DELPHI_INPUT="${fixture}"
 export DELPHI_OUTPUT="${runtime_dir}/output.root"
 export DELPHI_INPUT_MODE=file
 export DELPHI_CONVERSION_PASS=sdst
 export DELPHI_IS_REAL_DATA=false
 export DELPHI_MAX_EVENTS=1
+export PERL5LIB="${repo_root}/compat/perl${PERL5LIB:+:${PERL5LIB}}"
 (
   cd "${runtime_dir}"
   "${launcher}" "${repo_root}/steering/delphi_convert_cfg.py" > run.log 2>&1

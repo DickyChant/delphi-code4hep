@@ -147,8 +147,12 @@ the closer two-pitch N zone, the outer N layouts, noise, thresholds and ADC
 calibration. `VertexReadoutGeometry` binds them to all 288 semantic sensor IDs,
 their P/N `MTRX` transforms and CARGO `USER` active lines. The snapshot audit
 checks the full catalogue, all 319,488 v94c `SVELCH` electronics addresses,
-and coordinate/cell-ID round trips. Strip charge sharing, raw digitization and
-clustering remain the next VD slice.
+and coordinate/cell-ID round trips. Scheduled response modules now aggregate
+the transported deposits, apply deterministic channel noise and thresholds,
+write `RawTimeSeries` strip digits, reconstruct one-dimensional
+`TrackerHitPlane` measurements, and persist standard truth links. Faithful
+strip charge sharing, generated noise clusters, cross-talk, P/N cluster
+pairing, and legacy closure remain.
 
 The same renderer now completes the central-tracker transport boundary.
 `--id` reconstructs the inner detector's DELPHI `FORB` cells, `--od`
@@ -163,10 +167,19 @@ ID, TPC, or OD consistently with the transported hit position. A scheduled
 `DelphiTrackerHitPartitionProducer` then publishes separate VD, ID, TPC, and OD
 `SimTrackerHitCollection` products and CI checks that their full payload and MC
 provenance survive the split.
-This is not yet a claim of a complete native pipeline: only the TPC currently
-has calibrated digitization and hit reconstruction. VD/ID/OD response,
-tracking and vertex reconstruction, the non-tracking detectors, and the final
-replacement of the PHDST/DSTANA input boundary remain.
+The ID jet chamber now has a scheduled response slice as well. It interpolates
+each transported segment across the 24 calibrated wire cylinders, applies the
+v94c pressure, temperature, high-voltage, magnetic-field, dead-time,
+efficiency, resolution, and fine-TDC response, writes physical-channel raw
+digits, and reconstructs both left/right drift hypotheses with truth links.
+The trigger layers, charge/noise response, ambiguity resolution, and legacy
+closure are still outstanding.
+
+This is not yet a claim of a complete native pipeline: VD, ID, and TPC now have
+scheduled but differently complete digitization/reconstruction slices. OD
+response, central tracking and vertex reconstruction, the non-tracking
+detectors, and the final replacement of the PHDST/DSTANA input boundary
+remain.
 
 ## Scope
 

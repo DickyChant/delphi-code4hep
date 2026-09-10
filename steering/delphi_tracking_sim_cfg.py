@@ -56,6 +56,29 @@ process.vertexHits = cms.EDProducer(
     cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
 )
 
+process.innerDetectorDigis = cms.EDProducer(
+    "delphi_edm4hep::DelphiInnerDetectorDigitizerProducer",
+    simTrackerHits=cms.InputTag(
+        "trackerPartitions", "InnerDetectorSimHits"
+    ),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    magneticFieldTesla=cms.double(float(os.environ["C4H_FIELD_TESLA"])),
+    randomSeed=cms.uint32(24680),
+    wireEfficiency=cms.double(0.80),
+    transverseResolutionCm=cms.double(0.0100),
+)
+
+process.innerDetectorHits = cms.EDProducer(
+    "delphi_edm4hep::DelphiInnerDetectorHitReconstructionProducer",
+    digis=cms.InputTag("innerDetectorDigis", "InnerDetectorJetDigis"),
+    digiTruthLinks=cms.InputTag(
+        "innerDetectorDigis", "InnerDetectorDigiSimTrackerHitLinks"
+    ),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    magneticFieldTesla=cms.double(float(os.environ["C4H_FIELD_TESLA"])),
+    transverseResolutionCm=cms.double(0.0100),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -66,6 +89,12 @@ process.simulation_step = cms.Path(process.sim)
 process.partition_step = cms.Path(process.trackerPartitions)
 process.vertex_digitization_step = cms.Path(process.vertexDigis)
 process.vertex_reconstruction_step = cms.Path(process.vertexHits)
+process.inner_detector_digitization_step = cms.Path(
+    process.innerDetectorDigis
+)
+process.inner_detector_reconstruction_step = cms.Path(
+    process.innerDetectorHits
+)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
@@ -73,5 +102,7 @@ process.schedule = cms.Schedule(
     process.partition_step,
     process.vertex_digitization_step,
     process.vertex_reconstruction_step,
+    process.inner_detector_digitization_step,
+    process.inner_detector_reconstruction_step,
     process.output_step,
 )
