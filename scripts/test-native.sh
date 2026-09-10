@@ -123,6 +123,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   geometry_model_test \
   gdml_world_writer_test \
   gdml_beam_pipe_writer_test \
+  tpc_digitization_conditions_test \
   tpc_pad_response_test \
   tpc_readout_geometry_test \
   delphi_geometry_audit \
@@ -175,6 +176,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/geometry_model_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_world_writer_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_beam_pipe_writer_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_digitization_conditions_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_pad_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_readout_geometry_test"
 
@@ -211,6 +213,12 @@ for expected in \
   first_row_radius_cm=36.5 \
   last_row_radius_cm=106.225 \
   drift_half_length_cm=145 \
+  high_voltage_volt=25306 \
+  minimum_ionizing_dedx=254.5 \
+  mean_pad_amplitude=652.8 \
+  drift_velocity_endcap0_cm_per_us=6.998 \
+  drift_velocity_endcap1_cm_per_us=7.002 \
+  closed_gates=12 \
   centre_pad_mismatches=0 \
   stampa_response_mismatches=0; do
   if ! grep -qx "${expected}" <<< "${tpc_readout_audit}"; then

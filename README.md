@@ -103,7 +103,10 @@ mapping. The framework-independent `TpcPadResponse` kernel also ports STAMPA's
 deterministic induction onto five neighboring pads, including the v94c response
 width, drift-distance, local-incidence, and Lorentz-angle terms. Primary
 ionization, Landau fluctuations, diffusion in time, thresholds, and ADC
-response remain the next TPC digitization layers.
+response remain the next TPC digitization layers. Native conditions decoding
+already supplies those layers with the v94c high voltage, dE/dx and pad-gain
+normalizations, both endcap drift velocities, and all packed sector gate
+states directly from CARGO.
 
 ## Scope
 
