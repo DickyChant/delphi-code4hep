@@ -191,11 +191,13 @@ The combined central-tracker job now also schedules the native TPC response
 and a first truth-independent helix seed. Neighboring pad responses are
 aggregated by TPC row, a deterministic circle-plus-longitudinal fit produces
 the EDM4hep perigee parameters, and the resulting `Track` retains all of its
-reconstructed TPC hit relations and fit quality. The current seed is
-interaction-point constrained and forms at most one candidate per TPC
-endcap/sector; multi-track finding, sector-boundary merging, VD/ID/OD hit
-association and ambiguity resolution, material-aware refitting, and legacy
-tracking closure are still required.
+reconstructed TPC hit relations and fit quality. A geometric helix extension
+then attaches compatible VD measurements and globally selects one track and
+one drift-side hypothesis for each ID/OD physical channel; CI requires all
+four tracking systems on the final EDM4hep `Track` and exact fixed-seed replay.
+The current seed is interaction-point constrained and forms at most one
+candidate per TPC endcap/sector; multi-track finding, sector-boundary merging,
+material-aware refitting, and legacy tracking closure are still required.
 
 This is not yet a claim of a complete native pipeline: VD, ID, TPC, and OD now
 have scheduled but differently complete digitization/reconstruction slices.
