@@ -99,8 +99,11 @@ snapshot now defines the TPC readout boundary as well: 16 calibrated pad rows,
 Geant4 step positions and writes ordinary `TrackerHit3D` products. CI transports
 one event through the DELPHI TPC, requires mapped pad hits with valid cell IDs,
 and checks the authoritative 20,160-pad topology. This is geometrical channel
-mapping; drift, diffusion, charge sharing, thresholds, and ADC response remain
-the next TPC digitization layer.
+mapping. The framework-independent `TpcPadResponse` kernel also ports STAMPA's
+deterministic induction onto five neighboring pads, including the v94c response
+width, drift-distance, local-incidence, and Lorentz-angle terms. Primary
+ionization, Landau fluctuations, diffusion in time, thresholds, and ADC
+response remain the next TPC digitization layers.
 
 ## Scope
 
