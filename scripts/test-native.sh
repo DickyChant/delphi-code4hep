@@ -216,6 +216,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_time_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_geometry_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_response_test"
+"${code4hep_build}/delphi_edm4hep/tests/inner_detector_jet_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_channel_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_digitization_conditions_test"
 
@@ -263,6 +264,11 @@ for expected in \
   dead_time_us=0.055 \
   cathode_anode_ratio=2.3875 \
   cathode_sigma_cm=0.286 \
+  jet_lorentz_angle_deg=-6.36012 \
+  jet_boundary_angle_deg=5 \
+  jet_s1_w1_left_edge_ns=1940.97 \
+  jet_s1_w1_right_edge_ns=1846.08 \
+  jet_max_drift_time_ns=1940.97 \
   jet_bad_channels=2 \
   anode_bad_channels=0 \
   cathode_bad_channels=0 \
