@@ -126,8 +126,12 @@ waveforms as EDM4hep `TimeSeries`. CI validates physical thresholded waveforms
 and their DELPHI cell IDs, 73.82 ns clock, and 8-bit ADC range. A following
 `DelphiTpcHitReconstructionProducer` converts each waveform peak back to a
 calibrated pad-centre and drift-z `TrackerHit3D`, including channel quality and
-position covariance. The repeated-run CI compares both waveform and hit
-payloads exactly.
+position covariance. Charge-weighted simulated-hit provenance is carried
+through an in-memory digitizer link and published at the reconstruction
+boundary as the standard EDM4hep `TrackerHitSimTrackerHitLinkCollection`. CI
+requires every reconstructed hit to have resolvable, unit-normalized truth
+weights, and the repeated-run check compares waveforms, hits, and truth links
+exactly.
 
 ## Scope
 

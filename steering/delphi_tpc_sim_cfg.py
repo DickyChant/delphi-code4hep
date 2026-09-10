@@ -54,6 +54,9 @@ process.tpcDigis = cms.EDProducer(
 process.tpcHits = cms.EDProducer(
     "delphi_edm4hep::DelphiTpcHitReconstructionProducer",
     digis=cms.InputTag("tpcDigis", "TpcDigis"),
+    digiTruthLinks=cms.InputTag(
+        "tpcDigis", "TpcDigiSimTrackerHitLinks"
+    ),
     cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
 )
 

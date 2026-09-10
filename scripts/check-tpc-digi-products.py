@@ -55,7 +55,33 @@ def payload(path):
                 tuple(covariance[index] for index in range(6)),
             )
         )
-    return result, hit_result
+    truth_links = frames[0].get("tpcHitsTpcHitSimTrackerHitLinks")
+    truth_by_hit = {}
+    truth_result = []
+    for link in truth_links:
+        hit = link.getFrom()
+        sim_hit = link.getTo()
+        weight = link.getWeight()
+        if not hit.isAvailable() or not sim_hit.isAvailable():
+            raise RuntimeError("unresolved TPC reconstructed-hit truth link")
+        if not sim_hit.getParticle().isAvailable():
+            raise RuntimeError(
+                "TPC truth link points to an unlabelled simulated hit"
+            )
+        if not math.isfinite(weight) or weight <= 0 or weight > 1:
+            raise RuntimeError(f"invalid TPC truth-link weight: {weight}")
+        hit_index = hit.getObjectID().index
+        sim_index = sim_hit.getObjectID().index
+        truth_by_hit[hit_index] = truth_by_hit.get(hit_index, 0.0) + weight
+        truth_result.append((hit_index, sim_index, weight))
+    if set(truth_by_hit) != set(range(len(hits))):
+        raise RuntimeError("TPC truth links do not cover every reconstructed hit")
+    for hit_index, weight in truth_by_hit.items():
+        if not math.isclose(weight, 1.0, rel_tol=0, abs_tol=1e-5):
+            raise RuntimeError(
+                f"TPC truth weights for hit {hit_index} sum to {weight}"
+            )
+    return result, hit_result, truth_result
 
 
 def main():
@@ -65,18 +91,18 @@ def main():
     parser.add_argument("--reference")
     args = parser.parse_args()
 
-    digis, hits = payload(args.file)
+    digis, hits, truth = payload(args.file)
     if len(digis) < args.minimum_digis:
         raise RuntimeError(
             f"expected at least {args.minimum_digis} TPC digis, found {len(digis)}"
         )
-    if args.reference and (digis, hits) != payload(args.reference):
+    if args.reference and (digis, hits, truth) != payload(args.reference):
         raise RuntimeError(
             "TPC digitization/reconstruction is not reproducible for the fixed seed"
         )
     print(
         f"TPC digitization closure passed: {len(digis)} waveforms, "
-        f"{len(hits)} reconstructed hits"
+        f"{len(hits)} reconstructed hits, {len(truth)} truth links"
     )
 
 
