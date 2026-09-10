@@ -130,6 +130,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   tpc_time_response_test \
   tpc_wire_geometry_test \
   tpc_wire_response_test \
+  vertex_channel_response_test \
   vertex_digitization_conditions_test \
   delphi_geometry_audit \
   delphi_geometry_export \
@@ -203,6 +204,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/tpc_time_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_geometry_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_wire_response_test"
+"${code4hep_build}/delphi_edm4hep/tests/vertex_channel_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_digitization_conditions_test"
 
 geometry_snapshot="${DELPHI_RELEASE_ROOT}/simana/v94c/dat/CERNSNAP2001_94DELSIM.ASC"
