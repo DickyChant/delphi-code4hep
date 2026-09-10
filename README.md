@@ -77,7 +77,10 @@ seeded without the unavailable CMSSW RNG service, `G4SimProducer` publishes
 `SimTrackerHitCollection` and `SimCalorimeterHitCollection`, and CI validates
 non-empty physical hit content with the bundled one-muon GDML example. The
 magnetic field is explicit configuration and is persisted as
-`sim_detector_magneticFieldTesla`.
+`sim_detector_magneticFieldTesla`. Generator-primary identity is carried
+through every Geant4 descendant, so each persistent `SimTrackerHit` has a
+resolvable relation to its originating EDM4hep `MCParticle`; CI requires full
+relation coverage and the expected primary PDG after ROOT readback.
 
 The DELPHI side now has a dependency-free C++ parser and typed model for the
 authoritative CARGO/DDAPP simulation snapshot. CI reads the pinned v94c

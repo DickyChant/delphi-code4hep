@@ -336,7 +336,8 @@ g4_output="${build_root}/g4-smoke.edm4hep.root"
       > "${build_root}/g4-smoke.log" 2>&1
 )
 require_file "${g4_output}"
-python3 "${repo_root}/scripts/check-g4-products.py" "${g4_output}"
+python3 "${repo_root}/scripts/check-g4-products.py" \
+  --expected-primary-pdg 13 "${g4_output}"
 
 delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 (
@@ -352,6 +353,7 @@ delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 require_file "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-g4-products.py" \
   --expected-field 1.2312434 --min-tracker-hits 100 \
+  --expected-primary-pdg 13 \
   --allow-empty-calorimeter-hits \
   "${delphi_tpc_output}"
 python3 "${repo_root}/scripts/check-tpc-pad-products.py" \
