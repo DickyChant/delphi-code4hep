@@ -124,6 +124,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   gdml_world_writer_test \
   gdml_beam_pipe_writer_test \
   tpc_digitization_conditions_test \
+  tpc_fadc_test \
   tpc_pad_response_test \
   tpc_readout_geometry_test \
   tpc_time_response_test \
@@ -178,6 +179,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/gdml_world_writer_test"
 "${code4hep_build}/delphi_edm4hep/tests/gdml_beam_pipe_writer_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_digitization_conditions_test"
+"${code4hep_build}/delphi_edm4hep/tests/tpc_fadc_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_pad_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_readout_geometry_test"
 "${code4hep_build}/delphi_edm4hep/tests/tpc_time_response_test"

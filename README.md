@@ -111,7 +111,10 @@ pad calibration into electronics channel, pedestal, two-range slope, gain
 ratio, crossover, and status values. The native STDIPW response now adds
 longitudinal diffusion, electronics shaping, the 73.82 ns clock, and the
 13-sample asymmetric pulse window while accepting its random deviates
-explicitly from the future scheduled digitizer.
+explicitly from the future scheduled digitizer. The calibrated two-range FADC,
+pedestal-noise decomposition, saturation, and legacy threshold window are now
+native tested kernels as well; per-pad aggregation and `TimeSeries` publication
+are the remaining framework-integration step.
 
 ## Scope
 
