@@ -180,8 +180,18 @@ if ! grep -q 'delphi_edm4hep::DelphiTpcHitReconstructionProducer' \
   exit 1
 fi
 if ! grep -q 'delphi_edm4hep::DelphiTrackerHitPartitionProducer' \
-    "${plugin_dir}/.edmplugincache"; then
+  "${plugin_dir}/.edmplugincache"; then
   echo "ERROR: DelphiTrackerHitPartitionProducer was not registered" >&2
+  exit 1
+fi
+if ! grep -q 'delphi_edm4hep::DelphiVertexDigitizerProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiVertexDigitizerProducer was not registered" >&2
+  exit 1
+fi
+if ! grep -q 'delphi_edm4hep::DelphiVertexHitReconstructionProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiVertexHitReconstructionProducer was not registered" >&2
   exit 1
 fi
 for plugin in GenProducer G4SimProducer; do
@@ -442,6 +452,7 @@ delphi_tracking_output="${build_root}/delphi-tracking-smoke.edm4hep.root"
   C4H_MAX_EVENTS=1 \
     C4H_GDML="${delphi_tracking_gdml}" \
     C4H_FIELD_TESLA=1.2312434 \
+    C4H_DELPHI_CARGO="${geometry_snapshot}" \
     C4H_OUTPUT="${delphi_tracking_output}" \
     cmsRun "${repo_root}/steering/delphi_tracking_sim_cfg.py" \
       > "${build_root}/delphi-tracking-smoke.log" 2>&1
@@ -454,6 +465,24 @@ python3 "${repo_root}/scripts/check-g4-products.py" \
   "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-central-tracker-products.py" \
   "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
+  --minimum-digis 1 "${delphi_tracking_output}"
+
+delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root"
+(
+  cd "${workspace}/Code4hep"
+  C4H_MAX_EVENTS=1 \
+    C4H_GDML="${delphi_tracking_gdml}" \
+    C4H_FIELD_TESLA=1.2312434 \
+    C4H_DELPHI_CARGO="${geometry_snapshot}" \
+    C4H_OUTPUT="${delphi_tracking_repeat_output}" \
+    cmsRun "${repo_root}/steering/delphi_tracking_sim_cfg.py" \
+      > "${build_root}/delphi-tracking-repeat.log" 2>&1
+)
+require_file "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-vertex-digi-products.py" \
+  --minimum-digis 1 --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
 
 delphi_tpc_output="${build_root}/delphi-tpc-smoke.edm4hep.root"
 (

@@ -40,6 +40,22 @@ process.trackerPartitions = cms.EDProducer(
     simTrackerHits=cms.InputTag("sim", "SimTrackerHits"),
 )
 
+process.vertexDigis = cms.EDProducer(
+    "delphi_edm4hep::DelphiVertexDigitizerProducer",
+    simTrackerHits=cms.InputTag("trackerPartitions", "VertexSimHits"),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+    randomSeed=cms.uint32(13579),
+)
+
+process.vertexHits = cms.EDProducer(
+    "delphi_edm4hep::DelphiVertexHitReconstructionProducer",
+    digis=cms.InputTag("vertexDigis", "VertexDigis"),
+    digiTruthLinks=cms.InputTag(
+        "vertexDigis", "VertexDigiSimTrackerHitLinks"
+    ),
+    cargoSnapshot=cms.string(os.environ["C4H_DELPHI_CARGO"]),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -48,10 +64,14 @@ process.output = cms.OutputModule(
 process.generation_step = cms.Path(process.gen)
 process.simulation_step = cms.Path(process.sim)
 process.partition_step = cms.Path(process.trackerPartitions)
+process.vertex_digitization_step = cms.Path(process.vertexDigis)
+process.vertex_reconstruction_step = cms.Path(process.vertexHits)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
     process.simulation_step,
     process.partition_step,
+    process.vertex_digitization_step,
+    process.vertex_reconstruction_step,
     process.output_step,
 )
