@@ -198,10 +198,12 @@ four tracking systems on the extended EDM4hep `Track`. A weighted global
 circle-plus-longitudinal refit then uses the selected measurements, omits the
 unmeasured ID/VD longitudinal coordinates, and reduces the algebraic-circle
 bias of the high-momentum seed. CI checks momentum/slope closure and exact
-fixed-seed replay. The current finder is interaction-point constrained and
-forms at most one candidate per TPC endcap/sector; multi-track finding,
-sector-boundary merging, material effects, and legacy tracking closure are
-still required.
+fixed-seed replay. A subsequent truth-attribution producer joins selected hits
+to the four standard hit-truth products and writes normalized EDM4hep
+`TrackMCParticleLink` relations; truth is not used by finding or fitting. The
+current finder is interaction-point constrained and forms at most one
+candidate per TPC endcap/sector; multi-track finding, sector-boundary merging,
+material effects, and legacy tracking closure are still required.
 
 This is not yet a claim of a complete native pipeline: VD, ID, TPC, and OD now
 have scheduled but differently complete digitization/reconstruction slices.
