@@ -194,10 +194,14 @@ the EDM4hep perigee parameters, and the resulting `Track` retains all of its
 reconstructed TPC hit relations and fit quality. A geometric helix extension
 then attaches compatible VD measurements and globally selects one track and
 one drift-side hypothesis for each ID/OD physical channel; CI requires all
-four tracking systems on the final EDM4hep `Track` and exact fixed-seed replay.
-The current seed is interaction-point constrained and forms at most one
-candidate per TPC endcap/sector; multi-track finding, sector-boundary merging,
-material-aware refitting, and legacy tracking closure are still required.
+four tracking systems on the extended EDM4hep `Track`. A weighted global
+circle-plus-longitudinal refit then uses the selected measurements, omits the
+unmeasured ID/VD longitudinal coordinates, and reduces the algebraic-circle
+bias of the high-momentum seed. CI checks momentum/slope closure and exact
+fixed-seed replay. The current finder is interaction-point constrained and
+forms at most one candidate per TPC endcap/sector; multi-track finding,
+sector-boundary merging, material effects, and legacy tracking closure are
+still required.
 
 This is not yet a claim of a complete native pipeline: VD, ID, TPC, and OD now
 have scheduled but differently complete digitization/reconstruction slices.

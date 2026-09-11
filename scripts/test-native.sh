@@ -230,6 +230,11 @@ if ! grep -q 'delphi_edm4hep::DelphiCentralTrackExtensionProducer' \
   echo "ERROR: DelphiCentralTrackExtensionProducer was not registered" >&2
   exit 1
 fi
+if ! grep -q 'delphi_edm4hep::DelphiCentralTrackRefitProducer' \
+  "${plugin_dir}/.edmplugincache"; then
+  echo "ERROR: DelphiCentralTrackRefitProducer was not registered" >&2
+  exit 1
+fi
 for plugin in GenProducer G4SimProducer; do
   if ! grep -q "${plugin}" "${plugin_dir}/.edmplugincache"; then
     echo "ERROR: ${plugin} was not registered in the plugin cache" >&2
@@ -587,6 +592,8 @@ python3 "${repo_root}/scripts/check-central-track-fit-products.py" \
   --minimum-tracks 1 "${delphi_tracking_output}"
 python3 "${repo_root}/scripts/check-central-track-extension-products.py" \
   "${delphi_tracking_output}"
+python3 "${repo_root}/scripts/check-central-track-refit-products.py" \
+  "${delphi_tracking_output}"
 
 delphi_tracking_repeat_output="${build_root}/delphi-tracking-repeat.edm4hep.root"
 (
@@ -616,6 +623,9 @@ python3 "${repo_root}/scripts/check-central-track-fit-products.py" \
   --minimum-tracks 1 --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 python3 "${repo_root}/scripts/check-central-track-extension-products.py" \
+  --reference "${delphi_tracking_output}" \
+  "${delphi_tracking_repeat_output}"
+python3 "${repo_root}/scripts/check-central-track-refit-products.py" \
   --reference "${delphi_tracking_output}" \
   "${delphi_tracking_repeat_output}"
 

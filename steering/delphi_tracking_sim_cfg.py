@@ -140,6 +140,20 @@ process.extendedCentralTracks = cms.EDProducer(
     outerDetectorLongitudinalWindowMm=cms.double(150.0),
 )
 
+process.refittedCentralTracks = cms.EDProducer(
+    "delphi_edm4hep::DelphiCentralTrackRefitProducer",
+    tracks=cms.InputTag(
+        "extendedCentralTracks", "ExtendedCentralTracks"
+    ),
+    vertexTransverseSigmaMm=cms.double(1.0),
+    innerDetectorTransverseSigmaMm=cms.double(1.0),
+    tpcTransverseSigmaMm=cms.double(5.0),
+    tpcLongitudinalSigmaMm=cms.double(10.0),
+    outerDetectorTransverseSigmaMm=cms.double(10.0),
+    outerDetectorLongitudinalSigmaMm=cms.double(55.0),
+    constrainToInteractionPoint=cms.bool(True),
+)
+
 process.output = cms.OutputModule(
     "PodioOutputModule",
     fileName=cms.untracked.string(os.environ["C4H_OUTPUT"]),
@@ -168,6 +182,7 @@ process.outer_detector_reconstruction_step = cms.Path(
 process.central_track_extension_step = cms.Path(
     process.extendedCentralTracks
 )
+process.central_track_refit_step = cms.Path(process.refittedCentralTracks)
 process.output_step = cms.EndPath(process.output)
 process.schedule = cms.Schedule(
     process.generation_step,
@@ -183,5 +198,6 @@ process.schedule = cms.Schedule(
     process.outer_detector_digitization_step,
     process.outer_detector_reconstruction_step,
     process.central_track_extension_step,
+    process.central_track_refit_step,
     process.output_step,
 )
