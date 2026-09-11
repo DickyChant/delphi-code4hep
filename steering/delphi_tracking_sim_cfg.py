@@ -102,6 +102,8 @@ process.centralTracks = cms.EDProducer(
     minimumRows=cms.uint32(8),
     transverseSigmaMm=cms.double(5.0),
     longitudinalSigmaMm=cms.double(10.0),
+    transverseResidualWindowMm=cms.double(15.0),
+    longitudinalResidualWindowMm=cms.double(50.0),
     constrainToInteractionPoint=cms.bool(True),
 )
 

@@ -133,6 +133,7 @@ cmake --build "${code4hep_build}" -j"${C4H_BUILD_CORES:-4}" --target \
   inner_detector_jet_response_test \
   outer_detector_response_test \
   central_track_fit_test \
+  central_track_finder_test \
   helix_trajectory_test \
   vertex_channel_response_test \
   vertex_digitization_conditions_test \
@@ -264,6 +265,7 @@ done
 "${code4hep_build}/delphi_edm4hep/tests/inner_detector_jet_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/outer_detector_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/central_track_fit_test"
+"${code4hep_build}/delphi_edm4hep/tests/central_track_finder_test"
 "${code4hep_build}/delphi_edm4hep/tests/helix_trajectory_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_channel_response_test"
 "${code4hep_build}/delphi_edm4hep/tests/vertex_digitization_conditions_test"
